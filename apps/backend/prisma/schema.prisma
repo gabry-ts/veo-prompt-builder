@@ -26,15 +26,36 @@ model User {
 }
 
 model Prompt {
+  id           String          @id @default(cuid())
+  name         String
+  description  String?
+  jsonData     Json
+  userId       String
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags         String[]        @default([])
+  isFavorite   Boolean         @default(false)
+  rating       Int?
+  shareToken   String?         @unique
+  isPublic     Boolean         @default(false)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  versions     PromptVersion[]
+
+  @@index([userId])
+  @@index([shareToken])
+  @@map("prompts")
+}
+
+model PromptVersion {
   id          String   @id @default(cuid())
+  promptId    String
+  prompt      Prompt   @relation(fields: [promptId], references: [id], onDelete: Cascade)
   name        String
   description String?
   jsonData    Json
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  version     Int
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 
-  @@index([userId])
-  @@map("prompts")
+  @@index([promptId])
+  @@map("prompt_versions")
 }

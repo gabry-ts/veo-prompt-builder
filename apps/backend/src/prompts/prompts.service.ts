@@ -10,14 +10,27 @@ export class PromptsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(userId: string, createPromptDto: CreatePromptDto): Promise<Prompt> {
+    const shareToken = createPromptDto.isPublic ? this.generateShareToken() : null;
+
     return this.prisma.prompt.create({
       data: {
         name: createPromptDto.name,
         description: createPromptDto.description,
         jsonData: createPromptDto.jsonData as Prisma.InputJsonValue,
         userId,
+        tags: createPromptDto.tags || [],
+        isFavorite: createPromptDto.isFavorite || false,
+        rating: createPromptDto.rating,
+        isPublic: createPromptDto.isPublic || false,
+        shareToken,
       },
     });
+  }
+
+  private generateShareToken(): string {
+    return (
+      Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+    );
   }
 
   async findAll(userId: string): Promise<Prompt[]> {
@@ -52,6 +65,10 @@ export class PromptsService {
         name: updatePromptDto.name,
         description: updatePromptDto.description,
         jsonData: updatePromptDto.jsonData as Prisma.InputJsonValue | undefined,
+        tags: updatePromptDto.tags,
+        isFavorite: updatePromptDto.isFavorite,
+        rating: updatePromptDto.rating,
+        isPublic: updatePromptDto.isPublic,
       },
     });
   }
