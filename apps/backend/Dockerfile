@@ -30,6 +30,9 @@ RUN npx prisma generate
 # Build application
 RUN yarn build
 
+# Compile seed script
+RUN npx tsc prisma/seed.ts --outDir prisma --module commonjs --esModuleInterop --skipLibCheck
+
 # Production stage
 FROM base AS runner
 WORKDIR /app
