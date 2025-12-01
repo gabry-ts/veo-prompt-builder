@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import MarkdownPreview from '../components/MarkdownPreview';
 import StarRating from '../components/StarRating';
 import ValidationPanel from '../components/ValidationPanel';
 import type { VeoPromptStructure } from '../data/veoTemplates';
@@ -141,9 +142,12 @@ function PromptCard({
         </div>
 
         {prompt.description && (
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">
-            {prompt.description}
-          </p>
+          <div className="mb-3 line-clamp-2">
+            <MarkdownPreview
+              content={prompt.description}
+              className="text-gray-600 dark:text-gray-400 text-sm"
+            />
+          </div>
         )}
 
         <div className="mb-3">
