@@ -69,7 +69,16 @@ function PromptEditorPage(): JSX.Element {
         onNameChange={setName}
         onDescriptionChange={setDescription}
       />
-      <MetadataForm tags={tags} onTagsChange={setTags} rating={rating} onRatingChange={setRating} />
+      <MetadataForm
+        tags={tags}
+        onTagsChange={setTags}
+        rating={rating}
+        onRatingChange={setRating}
+        isFavorite={isFavorite}
+        onFavoriteChange={setIsFavorite}
+        isPublic={isPublic}
+        onPublicChange={setIsPublic}
+      />
       <TemplatesSection
         isEditMode={isEditMode}
         name={name}

@@ -164,6 +164,10 @@ interface MetadataFormProps {
   onTagsChange: (tags: string[]) => void;
   rating: number | undefined;
   onRatingChange: (rating: number | undefined) => void;
+  isFavorite: boolean;
+  onFavoriteChange: (favorite: boolean) => void;
+  isPublic: boolean;
+  onPublicChange: (isPublic: boolean) => void;
 }
 
 export function MetadataForm({
@@ -171,6 +175,10 @@ export function MetadataForm({
   onTagsChange,
   rating,
   onRatingChange,
+  isFavorite,
+  onFavoriteChange,
+  isPublic,
+  onPublicChange,
 }: MetadataFormProps): JSX.Element {
   const [tagInput, setTagInput] = useState('');
 
@@ -234,12 +242,40 @@ export function MetadataForm({
             ))}
           </div>
         </div>
+      </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Rating
           </label>
           <StarRating rating={rating} onRate={onRatingChange} />
+        </div>
+
+        <div className="flex items-end">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isFavorite}
+              onChange={(e) => onFavoriteChange(e.target.checked)}
+              className="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+            />
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              ⭐ Favorite
+            </span>
+          </label>
+        </div>
+
+        <div className="flex items-end">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isPublic}
+              onChange={(e) => onPublicChange(e.target.checked)}
+              className="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+            />
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">🌍 Public</span>
+          </label>
         </div>
       </div>
     </div>
