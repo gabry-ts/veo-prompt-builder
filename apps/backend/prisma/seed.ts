@@ -40,6 +40,7 @@ async function main(): Promise<void> {
       email: defaultEmail,
       password: hashedPassword,
       name: userName,
+      role: 'ADMIN', // First user is always ADMIN
     },
   });
 

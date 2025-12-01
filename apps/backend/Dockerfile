@@ -49,5 +49,5 @@ ENV NODE_ENV=production
 # Expose port
 EXPOSE 3000
 
-# Run migrations and start application
-CMD ["sh", "-c", "yarn prisma migrate deploy && node dist/main"]
+# Run migrations, seed, and start application
+CMD ["sh", "-c", "yarn prisma migrate deploy && yarn prisma db seed && node dist/main"]
