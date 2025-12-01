@@ -1,13 +1,29 @@
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQueryClient,
+  useQuery,
+  type UseMutationResult,
+} from '@tanstack/react-query';
 import { useState, useEffect, useMemo } from 'react';
 import type { VeoPromptStructure, TemplateDomain } from '../../data/veoTemplates';
 import { emptyTemplate } from '../../data/veoTemplates';
 import { promptService } from '../../services/promptService';
+import type { Prompt } from '../../types/prompt';
 import { isPromptDataPristine } from '../../utils/formHelpers';
 import { validateVeoPrompt } from '../../utils/veoValidation';
 import type { ValidationResult } from '../../utils/veoValidation/types';
 
 type EditorMode = 'visual' | 'json';
+
+interface PromptMutationData {
+  name: string;
+  description?: string;
+  jsonData: Record<string, unknown>;
+  tags?: string[];
+  isFavorite?: boolean;
+  rating?: number;
+  isPublic?: boolean;
+}
 
 interface UsePromptEditorProps {
   id?: string;
@@ -20,6 +36,14 @@ interface UsePromptEditorReturn {
   setName: (name: string) => void;
   description: string;
   setDescription: (description: string) => void;
+  tags: string[];
+  setTags: (tags: string[]) => void;
+  isFavorite: boolean;
+  setIsFavorite: (favorite: boolean) => void;
+  rating: number | undefined;
+  setRating: (rating: number | undefined) => void;
+  isPublic: boolean;
+  setIsPublic: (isPublic: boolean) => void;
   editorMode: EditorMode;
   setEditorMode: (mode: EditorMode) => void;
   showTemplateSelector: boolean;
@@ -52,12 +76,44 @@ const downloadJsonFile = (data: VeoPromptStructure, name: string): void => {
   URL.revokeObjectURL(url);
 };
 
+const useCreatePromptMutation = (
+  queryClient: ReturnType<typeof useQueryClient>,
+  onNavigate: (path: string) => void,
+): UseMutationResult<Prompt, unknown, PromptMutationData, unknown> => {
+  return useMutation({
+    mutationFn: (data: PromptMutationData) => promptService.create(data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['prompts'] });
+      onNavigate('/dashboard');
+    },
+  });
+};
+
+const useUpdatePromptMutation = (
+  id: string,
+  queryClient: ReturnType<typeof useQueryClient>,
+  onNavigate: (path: string) => void,
+): UseMutationResult<Prompt, unknown, PromptMutationData, unknown> => {
+  return useMutation({
+    mutationFn: (data: PromptMutationData) => promptService.update(id, data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['prompts'] });
+      void queryClient.invalidateQueries({ queryKey: ['prompt', id] });
+      onNavigate('/dashboard');
+    },
+  });
+};
+
 export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePromptEditorReturn {
   const queryClient = useQueryClient();
   const isEditMode = Boolean(id);
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [rating, setRating] = useState<number | undefined>(undefined);
+  const [isPublic, setIsPublic] = useState(false);
   const [editorMode, setEditorMode] = useState<EditorMode>('visual');
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [promptData, setPromptData] = useState<VeoPromptStructure>(emptyTemplate);
@@ -70,9 +126,13 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
   });
 
   useEffect(() => {
-    if (prompt) {
+    if (prompt !== undefined) {
       setName(prompt.name);
-      setDescription(prompt.description || '');
+      setDescription(prompt.description ?? '');
+      setTags(prompt.tags);
+      setIsFavorite(prompt.isFavorite);
+      setRating(prompt.rating);
+      setIsPublic(prompt.isPublic);
       setPromptData(prompt.jsonData as unknown as VeoPromptStructure);
       setJsonData(JSON.stringify(prompt.jsonData, null, 2));
     }
@@ -84,24 +144,8 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
     }
   }, [promptData, editorMode]);
 
-  const createMutation = useMutation({
-    mutationFn: (data: { name: string; description?: string; jsonData: Record<string, unknown> }) =>
-      promptService.create(data),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['prompts'] });
-      onNavigate('/dashboard');
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: (data: { name: string; description?: string; jsonData: Record<string, unknown> }) =>
-      promptService.update(id!, data),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['prompts'] });
-      void queryClient.invalidateQueries({ queryKey: ['prompt', id] });
-      onNavigate('/dashboard');
-    },
-  });
+  const createMutation = useCreatePromptMutation(queryClient, onNavigate);
+  const updateMutation = useUpdatePromptMutation(id!, queryClient, onNavigate);
 
   const handleImportJson = (): void => {
     const input = document.createElement('input');
@@ -130,6 +174,10 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
         name,
         description: description || undefined,
         jsonData: finalJson as unknown as Record<string, unknown>,
+        tags,
+        isFavorite,
+        rating,
+        isPublic,
       };
       (isEditMode ? updateMutation : createMutation).mutate(data);
     } catch {
@@ -165,6 +213,14 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
     setName,
     description,
     setDescription,
+    tags,
+    setTags,
+    isFavorite,
+    setIsFavorite,
+    rating,
+    setRating,
+    isPublic,
+    setIsPublic,
     editorMode,
     setEditorMode,
     showTemplateSelector,
