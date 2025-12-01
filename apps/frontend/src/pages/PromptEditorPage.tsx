@@ -1,6 +1,11 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { getValidationSummary } from '../utils/veoValidation';
-import { PageHeader, BasicInfoForm } from './helpers/PromptEditorHelpers';
+import {
+  PageHeader,
+  BasicInfoForm,
+  MetadataForm,
+  MarkdownPreviewModal,
+} from './helpers/PromptEditorHelpers';
 import {
   TemplatesSection,
   MainContentGrid,
@@ -17,6 +22,14 @@ function PromptEditorPage(): JSX.Element {
     setName,
     description,
     setDescription,
+    tags,
+    setTags,
+    isFavorite,
+    setIsFavorite,
+    rating,
+    setRating,
+    isPublic,
+    setIsPublic,
     editorMode,
     setEditorMode,
     showTemplateSelector,
@@ -31,6 +44,16 @@ function PromptEditorPage(): JSX.Element {
     handleSave,
     handleExport,
     isSaving,
+    shareUrl,
+    versions,
+    isLoadingVersions,
+    handleRestoreVersion,
+    lastSaved,
+    markdownPreview,
+    showMarkdownModal,
+    handleMarkdownPreview,
+    handleMarkdownDownload,
+    handleCloseMarkdownModal,
   } = usePromptEditor({ id, onNavigate: navigate });
 
   return (
@@ -41,6 +64,16 @@ function PromptEditorPage(): JSX.Element {
         description={description}
         onNameChange={setName}
         onDescriptionChange={setDescription}
+      />
+      <MetadataForm
+        tags={tags}
+        onTagsChange={setTags}
+        isFavorite={isFavorite}
+        onFavoriteChange={setIsFavorite}
+        rating={rating}
+        onRatingChange={setRating}
+        isPublic={isPublic}
+        onPublicChange={setIsPublic}
       />
       <TemplatesSection
         isEditMode={isEditMode}
@@ -67,9 +100,24 @@ function PromptEditorPage(): JSX.Element {
         onJsonChange={setJsonData}
         onSave={handleSave}
         onExport={handleExport}
+        onMarkdownPreview={handleMarkdownPreview}
         isSaving={isSaving}
         canSave={!!name}
+        isEditMode={isEditMode}
+        shareUrl={shareUrl}
+        isPublic={isPublic}
+        lastSaved={lastSaved}
+        versions={versions}
+        isLoadingVersions={isLoadingVersions}
+        onRestoreVersion={handleRestoreVersion}
       />
+      {showMarkdownModal && markdownPreview !== null && (
+        <MarkdownPreviewModal
+          markdown={markdownPreview}
+          onClose={handleCloseMarkdownModal}
+          onDownload={handleMarkdownDownload}
+        />
+      )}
     </div>
   );
 }

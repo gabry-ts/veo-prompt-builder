@@ -1,5 +1,10 @@
+import type {
+  Prompt,
+  CreatePromptRequest,
+  UpdatePromptRequest,
+  PromptVersion,
+} from '../types/prompt';
 import api from './api';
-import type { Prompt, CreatePromptRequest, UpdatePromptRequest } from '../types/prompt';
 
 export const promptService = {
   getAll: async (): Promise<Prompt[]> => {
@@ -24,5 +29,20 @@ export const promptService = {
 
   delete: async (id: string): Promise<void> => {
     await api.delete(`/prompts/${id}`);
+  },
+
+  getVersions: async (id: string): Promise<PromptVersion[]> => {
+    const response = await api.get<PromptVersion[]>(`/prompts/${id}/versions`);
+    return response.data;
+  },
+
+  restoreVersion: async (id: string, versionId: string): Promise<Prompt> => {
+    const response = await api.post<Prompt>(`/prompts/${id}/versions/${versionId}/restore`);
+    return response.data;
+  },
+
+  exportMarkdown: async (id: string): Promise<string> => {
+    const response = await api.get<{ markdown: string }>(`/prompts/${id}/export/markdown`);
+    return response.data.markdown;
   },
 };

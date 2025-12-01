@@ -24,9 +24,7 @@ function FormSection({
       >
         <h3 className="font-semibold text-gray-900 dark:text-white">{title}</h3>
         {collapsible && (
-          <span className="text-gray-500 dark:text-gray-400">
-            {isOpen ? '▼' : '▶'}
-          </span>
+          <span className="text-gray-500 dark:text-gray-400">{isOpen ? '▼' : '▶'}</span>
         )}
       </button>
       {isOpen && <div className="p-4 space-y-4">{children}</div>}

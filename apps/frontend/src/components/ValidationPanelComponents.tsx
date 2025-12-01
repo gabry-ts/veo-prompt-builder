@@ -10,22 +10,27 @@ export function CompactBadge({ count, type, label }: CompactBadgeProps): JSX.Ele
   const config = {
     error: {
       Icon: AlertCircle,
-      classes: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-300 dark:border-red-700',
+      classes:
+        'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-300 dark:border-red-700',
     },
     warning: {
       Icon: AlertTriangle,
-      classes: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700',
+      classes:
+        'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700',
     },
     info: {
       Icon: Info,
-      classes: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-700',
+      classes:
+        'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-700',
     },
   };
 
   const { Icon, classes } = config[type];
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${classes} transition-all duration-300 hover:scale-105`}>
+    <span
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${classes} transition-all duration-300 hover:scale-105`}
+    >
       <Icon className="w-3.5 h-3.5" />
       {count} {label}
       {count > 1 ? 's' : ''}

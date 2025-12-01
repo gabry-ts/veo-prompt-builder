@@ -1,5 +1,10 @@
-import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
-import type { User } from '@prisma/client';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+import type { User, UserRole } from '@prisma/client';
 import { hash, compare } from 'bcrypt';
 import { PrismaService } from '../common/prisma/prisma.service';
 import type { CreateUserDto } from './dto/create-user.dto';
@@ -93,7 +98,7 @@ export class UsersService {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password: _password3, ...userWithoutPassword } = updatedUser;
+    const { password: _passwordThree, ...userWithoutPassword } = updatedUser;
     return userWithoutPassword;
   }
 
@@ -133,7 +138,10 @@ export class UsersService {
     });
   }
 
-  async adminUpdate(id: string, updateData: { email?: string; name?: string; role?: import('@prisma/client').UserRole }): Promise<Omit<User, 'password'>> {
+  async adminUpdate(
+    id: string,
+    updateData: { email?: string; name?: string; role?: UserRole },
+  ): Promise<Omit<User, 'password'>> {
     const user = await this.prisma.user.findUnique({
       where: { id },
     });

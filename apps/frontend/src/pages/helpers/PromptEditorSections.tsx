@@ -1,6 +1,7 @@
 import VisualFormBuilderV2 from '../../components/PromptBuilder/VisualFormBuilderV2';
 import ValidationPanel from '../../components/ValidationPanel';
 import type { VeoPromptStructure, TemplateDomain } from '../../data/veoTemplates';
+import type { PromptVersion } from '../../types/prompt';
 import type { ValidationResult } from '../../utils/veoValidation';
 import {
   EditorActions,
@@ -9,6 +10,8 @@ import {
   ValidationCard,
   TemplateSelector,
   WelcomeTemplate,
+  ShareSection,
+  VersionHistory,
 } from './PromptEditorHelpers';
 
 interface TemplatesSectionProps {
@@ -110,8 +113,16 @@ interface MainContentGridProps {
   onJsonChange: (value: string) => void;
   onSave: () => void;
   onExport: () => void;
+  onMarkdownPreview?: () => void;
   isSaving: boolean;
   canSave: boolean;
+  isEditMode: boolean;
+  shareUrl: string | undefined;
+  isPublic: boolean;
+  lastSaved: Date | null;
+  versions: PromptVersion[];
+  isLoadingVersions: boolean;
+  onRestoreVersion: (versionId: string) => void;
 }
 
 export function MainContentGrid({
@@ -124,8 +135,16 @@ export function MainContentGrid({
   onJsonChange,
   onSave,
   onExport,
+  onMarkdownPreview,
   isSaving,
   canSave,
+  isEditMode,
+  shareUrl,
+  isPublic,
+  lastSaved,
+  versions,
+  isLoadingVersions,
+  onRestoreVersion,
 }: MainContentGridProps): JSX.Element {
   return (
     <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -141,7 +160,19 @@ export function MainContentGrid({
       {/* Right Side - Validation & Actions (1 column) */}
       <div className="space-y-6">
         {/* Actions Card */}
-        <EditorActions onSave={onSave} onExport={onExport} isSaving={isSaving} canSave={canSave} />
+        <EditorActions
+          onSave={onSave}
+          onExport={onExport}
+          onMarkdownPreview={onMarkdownPreview}
+          isSaving={isSaving}
+          canSave={canSave}
+          isEditMode={isEditMode}
+        />
+
+        {/* Share Section (only in edit mode) */}
+        {isEditMode && (
+          <ShareSection shareUrl={shareUrl} isPublic={isPublic} lastSaved={lastSaved} />
+        )}
 
         <ValidationCard
           validationResult={validationResult}
@@ -149,6 +180,15 @@ export function MainContentGrid({
         >
           <ValidationPanel result={validationResult} />
         </ValidationCard>
+
+        {/* Version History (only in edit mode) */}
+        {isEditMode && (
+          <VersionHistory
+            versions={versions}
+            isLoading={isLoadingVersions}
+            onRestore={onRestoreVersion}
+          />
+        )}
 
         {editorMode === 'visual' && <JsonPreview data={promptData} />}
       </div>

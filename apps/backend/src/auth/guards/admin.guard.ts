@@ -1,18 +1,22 @@
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
+
+interface RequestWithUser {
+  user?: {
+    id: string;
+    email: string;
+    name: string;
+    role: UserRole;
+  };
+}
 
 @Injectable()
 export class AdminGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<RequestWithUser>();
     const user = request.user;
 
-    if (!user) {
+    if (user === undefined) {
       throw new ForbiddenException('User not authenticated');
     }
 

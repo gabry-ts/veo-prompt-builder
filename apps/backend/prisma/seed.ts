@@ -12,7 +12,9 @@ async function main(): Promise<void> {
 
   if (!defaultEmail || !defaultPassword) {
     // eslint-disable-next-line no-console
-    console.log('⚠️  No default user credentials provided via env vars (DEFAULT_USER_EMAIL, DEFAULT_USER_PASSWORD)');
+    console.log(
+      '⚠️  No default user credentials provided via env vars (DEFAULT_USER_EMAIL, DEFAULT_USER_PASSWORD)',
+    );
     // eslint-disable-next-line no-console
     console.log('   Skipping default user creation.');
     return;

@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { adminApi, type User, type CreateUserDto, type UpdateUserDto } from '../services/adminApi';
 import type { UserRole } from '../store/authStore';
 
+/* eslint-disable max-lines-per-function */
 function AdminPage(): JSX.Element {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +22,7 @@ function AdminPage(): JSX.Element {
   const [newPassword, setNewPassword] = useState('');
 
   useEffect(() => {
-    loadUsers();
+    void loadUsers();
   }, []);
 
   const loadUsers = async (): Promise<void> => {
@@ -67,7 +68,7 @@ function AdminPage(): JSX.Element {
       setSelectedUser(null);
       await loadUsers();
     } catch (error) {
-      toast.error('Errore nell\'aggiornamento utente');
+      toast.error("Errore nell'aggiornamento utente");
     }
   };
 
@@ -91,7 +92,7 @@ function AdminPage(): JSX.Element {
       toast.success('Utente eliminato con successo');
       await loadUsers();
     } catch (error) {
-      toast.error('Errore nell\'eliminazione utente');
+      toast.error("Errore nell'eliminazione utente");
     }
   };
 
@@ -123,9 +124,7 @@ function AdminPage(): JSX.Element {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Gestione Utenti
-        </h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Gestione Utenti</h1>
         <button
           onClick={() => setShowCreateModal(true)}
           className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
@@ -202,7 +201,9 @@ function AdminPage(): JSX.Element {
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Crea Nuovo Utente</h2>
+            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+              Crea Nuovo Utente
+            </h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -273,7 +274,9 @@ function AdminPage(): JSX.Element {
       {showEditModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Modifica Utente</h2>
+            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+              Modifica Utente
+            </h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -333,7 +336,9 @@ function AdminPage(): JSX.Element {
       {showPasswordModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Cambia Password</h2>
+            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+              Cambia Password
+            </h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
