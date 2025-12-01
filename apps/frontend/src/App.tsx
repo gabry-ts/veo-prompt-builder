@@ -5,7 +5,6 @@ import DashboardPage from './pages/DashboardPage';
 import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
 import PromptEditorPage from './pages/PromptEditorPage';
-import RegisterPage from './pages/RegisterPage';
 import AdminPage from './pages/AdminPage';
 import { useAuthStore } from './store/authStore';
 
@@ -83,14 +82,6 @@ function App(): JSX.Element {
           element={
             <PublicRoute>
               <LoginPage />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <PublicRoute>
-              <RegisterPage />
             </PublicRoute>
           }
         />
