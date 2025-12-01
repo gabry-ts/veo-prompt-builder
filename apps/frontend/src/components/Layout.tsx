@@ -31,6 +31,14 @@ function Layout(): JSX.Element {
               >
                 {theme === 'light' ? '🌙' : '☀️'}
               </button>
+              {user?.role === 'ADMIN' && (
+                <Link
+                  to="/admin"
+                  className="text-sm text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
+                >
+                  Admin
+                </Link>
+              )}
               <Link
                 to="/profile"
                 className="text-sm text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"

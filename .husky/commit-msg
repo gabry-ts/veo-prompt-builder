@@ -1,12 +1,10 @@
-#!/bin/sh
-
 # Conventional commits validation
 # Format: type(scope?): message
 # Types: feat, fix, docs, style, refactor, test, chore, perf, ci, build, hotfix, bugfix
 
 commit_msg=$(cat "$1")
 
-# Pattern: type(optional-scope): message (min 3 chars)
+# Pattern: DEFAULT_USER_EMAIL type(optional-scope): message (min 3 chars)
 pattern="^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|hotfix|bugfix)(\(.+\))?: .{3,}$"
 
 if ! echo "$commit_msg" | grep -qE "$pattern"; then

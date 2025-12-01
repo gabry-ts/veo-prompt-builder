@@ -42,10 +42,11 @@ services:
     networks:
       - meoveo-network
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/docs']
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
 
   frontend:
     build:
@@ -72,10 +73,11 @@ services:
     networks:
       - meoveo-network
     healthcheck:
-      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost/api/docs']
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost/api/health']
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
 
 networks:
   meoveo-network:

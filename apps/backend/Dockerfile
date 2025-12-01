@@ -30,6 +30,9 @@ RUN npx prisma generate
 # Build application
 RUN yarn build
 
+# Compile seed script
+RUN npx tsc prisma/seed.ts --outDir prisma --module commonjs --esModuleInterop --skipLibCheck
+
 # Production stage
 FROM base AS runner
 WORKDIR /app
@@ -49,5 +52,5 @@ ENV NODE_ENV=production
 # Expose port
 EXPOSE 3000
 
-# Run migrations and start application
-CMD ["sh", "-c", "yarn prisma migrate deploy && node dist/main"]
+# Run migrations, seed, and start application
+CMD ["sh", "-c", "yarn prisma migrate deploy && yarn prisma db seed && node dist/main"]

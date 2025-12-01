@@ -66,6 +66,7 @@ JWT_SECRET=your-secret-key
 ## API Documentation
 
 Swagger UI available at:
+
 - Development: <http://localhost:3000/api/docs>
 - Production: <http://localhost:43800/api/docs>
 

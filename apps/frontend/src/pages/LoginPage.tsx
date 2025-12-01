@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '../store/authStore';
 import { authService } from '../services/authService';
@@ -82,15 +82,6 @@ function LoginPage(): JSX.Element {
             >
               {loginMutation.isPending ? 'Signing in...' : 'Sign in'}
             </button>
-          </div>
-
-          <div className="text-sm text-center">
-            <Link
-              to="/register"
-              className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
-            >
-              Don't have an account? Sign up
-            </Link>
           </div>
         </form>
       </div>

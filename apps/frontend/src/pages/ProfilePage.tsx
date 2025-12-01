@@ -1,7 +1,8 @@
-import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useAuthStore } from '../store/authStore';
+import { useState } from 'react';
 import api from '../services/api';
+import { useAuthStore } from '../store/authStore';
+import type { User } from '../types/auth';
 
 interface UpdateProfileData {
   name?: string;
@@ -13,6 +14,7 @@ interface ChangePasswordData {
   newPassword: string;
 }
 
+/* eslint-disable max-lines-per-function */
 function ProfilePage(): JSX.Element {
   const queryClient = useQueryClient();
   const user = useAuthStore((state) => state.user);
@@ -34,24 +36,14 @@ function ProfilePage(): JSX.Element {
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: UpdateProfileData) => {
-      const response = await api.patch<{ id: string; email: string; name?: string }>(
-        '/users/me',
-        data,
-      );
+      const response = await api.patch<User>('/users/me', data);
       return response.data;
     },
     onSuccess: (data) => {
       void queryClient.invalidateQueries({ queryKey: ['profile'] });
       const token = useAuthStore.getState().token;
       if (token) {
-        setAuth(
-          {
-            id: data.id,
-            email: data.email,
-            name: data.name,
-          },
-          token,
-        );
+        setAuth(data, token);
       }
       alert('Profile updated successfully!');
     },
