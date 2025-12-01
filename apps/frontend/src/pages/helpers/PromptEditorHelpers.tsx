@@ -162,23 +162,15 @@ export function EditorActions({
 interface MetadataFormProps {
   tags: string[];
   onTagsChange: (tags: string[]) => void;
-  isFavorite: boolean;
-  onFavoriteChange: (favorite: boolean) => void;
   rating: number | undefined;
   onRatingChange: (rating: number | undefined) => void;
-  isPublic: boolean;
-  onPublicChange: (isPublic: boolean) => void;
 }
 
 export function MetadataForm({
   tags,
   onTagsChange,
-  isFavorite,
-  onFavoriteChange,
   rating,
   onRatingChange,
-  isPublic,
-  onPublicChange,
 }: MetadataFormProps): JSX.Element {
   const [tagInput, setTagInput] = useState('');
 
@@ -243,45 +235,11 @@ export function MetadataForm({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Rating
-            </label>
-            <StarRating rating={rating} onRate={onRatingChange} />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="isFavorite"
-              checked={isFavorite}
-              onChange={(e) => onFavoriteChange(e.target.checked)}
-              className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-            />
-            <label
-              htmlFor="isFavorite"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              ❤️ Favorite
-            </label>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="isPublic"
-              checked={isPublic}
-              onChange={(e) => onPublicChange(e.target.checked)}
-              className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-            />
-            <label
-              htmlFor="isPublic"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              🔗 Public
-            </label>
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Rating
+          </label>
+          <StarRating rating={rating} onRate={onRatingChange} />
         </div>
       </div>
     </div>
