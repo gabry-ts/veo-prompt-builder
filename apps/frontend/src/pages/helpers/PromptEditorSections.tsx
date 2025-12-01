@@ -170,7 +170,7 @@ export function MainContentGrid({
               onClick={onExport}
               className="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all font-semibold shadow-md hover:shadow-lg"
             >
-              📥 Export JSON
+              📦 JSON
             </button>
             {isEditMode && onMarkdownPreview !== undefined && (
               <button

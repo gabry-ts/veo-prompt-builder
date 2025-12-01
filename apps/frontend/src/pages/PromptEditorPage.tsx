@@ -4,6 +4,7 @@ import {
   BasicInfoForm,
   MetadataForm,
   MarkdownPreviewModal,
+  JsonPreviewModal,
 } from './helpers/PromptEditorHelpers';
 import {
   TemplatesSection,
@@ -53,6 +54,10 @@ function PromptEditorPage(): JSX.Element {
     handleMarkdownPreview,
     handleMarkdownDownload,
     handleCloseMarkdownModal,
+    jsonPreview,
+    showJsonModal,
+    handleJsonDownload,
+    handleCloseJsonModal,
   } = usePromptEditor({ id, onNavigate: navigate });
 
   return (
@@ -108,6 +113,13 @@ function PromptEditorPage(): JSX.Element {
           markdown={markdownPreview}
           onClose={handleCloseMarkdownModal}
           onDownload={handleMarkdownDownload}
+        />
+      )}
+      {showJsonModal && jsonPreview !== null && (
+        <JsonPreviewModal
+          json={jsonPreview}
+          onClose={handleCloseJsonModal}
+          onDownload={handleJsonDownload}
         />
       )}
     </div>

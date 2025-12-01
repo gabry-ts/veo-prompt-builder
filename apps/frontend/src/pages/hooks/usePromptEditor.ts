@@ -69,6 +69,10 @@ interface UsePromptEditorReturn {
   handleMarkdownPreview: () => void;
   handleMarkdownDownload: () => void;
   handleCloseMarkdownModal: () => void;
+  jsonPreview: string | null;
+  showJsonModal: boolean;
+  handleJsonDownload: () => void;
+  handleCloseJsonModal: () => void;
 }
 
 const getJsonFromEditor = (
@@ -76,16 +80,6 @@ const getJsonFromEditor = (
   data: VeoPromptStructure,
   json: string,
 ): VeoPromptStructure => (mode === 'visual' ? data : (JSON.parse(json) as VeoPromptStructure));
-
-const downloadJsonFile = (data: VeoPromptStructure, name: string): void => {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${name || 'prompt'}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-};
 
 const importJsonFile = (setPromptData: (data: VeoPromptStructure) => void): void => {
   const input = document.createElement('input');
@@ -245,6 +239,8 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [markdownPreview, setMarkdownPreview] = useState<string | null>(null);
   const [showMarkdownModal, setShowMarkdownModal] = useState(false);
+  const [jsonPreview, setJsonPreview] = useState<string | null>(null);
+  const [showJsonModal, setShowJsonModal] = useState(false);
 
   const { data: prompt } = useQuery({
     queryKey: ['prompt', id],
@@ -319,10 +315,28 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
 
   const handleExport = (): void => {
     try {
-      downloadJsonFile(getJsonFromEditor(editorMode, promptData, jsonData), name);
+      const json = getJsonFromEditor(editorMode, promptData, jsonData);
+      setJsonPreview(JSON.stringify(json, null, 2));
+      setShowJsonModal(true);
     } catch {
       alert('Invalid JSON format');
     }
+  };
+
+  const handleJsonDownload = (): void => {
+    if (!jsonPreview) return;
+    const blob = new Blob([jsonPreview], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${name || 'prompt'}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleCloseJsonModal = (): void => {
+    setShowJsonModal(false);
+    setJsonPreview(null);
   };
 
   const handleMarkdownPreview = (): void => {
@@ -409,5 +423,9 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
     handleMarkdownPreview,
     handleMarkdownDownload,
     handleCloseMarkdownModal,
+    jsonPreview,
+    showJsonModal,
+    handleJsonDownload,
+    handleCloseJsonModal,
   };
 }

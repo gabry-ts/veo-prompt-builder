@@ -564,3 +564,66 @@ export function MarkdownPreviewModal({
     </div>
   );
 }
+
+interface JsonPreviewModalProps {
+  json: string;
+  onClose: () => void;
+  onDownload: () => void;
+}
+
+export function JsonPreviewModal({
+  json,
+  onClose,
+  onDownload,
+}: JsonPreviewModalProps): JSX.Element {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (): void => {
+    void navigator.clipboard.writeText(json);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+        <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">📦 JSON Preview</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-2xl"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6">
+          <pre className="whitespace-pre-wrap font-mono text-sm bg-gray-50 dark:bg-gray-900 p-4 rounded-lg text-gray-900 dark:text-white">
+            {json}
+          </pre>
+        </div>
+
+        <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex gap-4">
+          <button
+            onClick={handleCopy}
+            className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+          >
+            {copied ? '✓ Copied!' : '📋 Copy to Clipboard'}
+          </button>
+          <button
+            onClick={onDownload}
+            className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+          >
+            📥 Download JSON
+          </button>
+          <button
+            onClick={onClose}
+            className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-semibold"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
