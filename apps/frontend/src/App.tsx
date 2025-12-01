@@ -6,11 +6,27 @@ import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
 import PromptEditorPage from './pages/PromptEditorPage';
 import RegisterPage from './pages/RegisterPage';
+import AdminPage from './pages/AdminPage';
 import { useAuthStore } from './store/authStore';
 
 function PrivateRoute({ children }: { children: React.ReactNode }): JSX.Element {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+}
+
+function AdminRoute({ children }: { children: React.ReactNode }): JSX.Element {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user?.role !== 'ADMIN') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
 }
 
 function PublicRoute({ children }: { children: React.ReactNode }): JSX.Element {
@@ -91,6 +107,14 @@ function App(): JSX.Element {
           <Route path="prompts/new" element={<PromptEditorPage />} />
           <Route path="prompts/:id" element={<PromptEditorPage />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route
+            path="admin"
+            element={
+              <AdminRoute>
+                <AdminPage />
+              </AdminRoute>
+            }
+          />
         </Route>
       </Routes>
     </BrowserRouter>

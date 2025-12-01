@@ -133,7 +133,7 @@ export class UsersService {
     });
   }
 
-  async adminUpdate(id: string, updateData: { email?: string; name?: string; role?: string }): Promise<Omit<User, 'password'>> {
+  async adminUpdate(id: string, updateData: { email?: string; name?: string; role?: import('@prisma/client').UserRole }): Promise<Omit<User, 'password'>> {
     const user = await this.prisma.user.findUnique({
       where: { id },
     });
