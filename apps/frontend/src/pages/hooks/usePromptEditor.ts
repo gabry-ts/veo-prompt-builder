@@ -169,7 +169,7 @@ interface AutosaveParams {
 }
 
 const useAutosave = (params: AutosaveParams): void => {
-  const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!params.isEditMode || !params.promptDataForSave.name) return;
