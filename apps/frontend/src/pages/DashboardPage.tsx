@@ -1,16 +1,94 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import StarRating from '../components/StarRating';
 import ValidationPanel from '../components/ValidationPanel';
 import type { VeoPromptStructure } from '../data/veoTemplates';
+import { usePromptFilters } from '../hooks/usePromptFilters';
 import { promptService } from '../services/promptService';
 import type { Prompt } from '../types/prompt';
 import { validateVeoPrompt } from '../utils/veoValidation';
+
+interface PromptFiltersProps {
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+  filterTag: string;
+  onFilterTagChange: (value: string) => void;
+  sortBy: 'date' | 'name';
+  onSortByChange: (value: 'date' | 'name') => void;
+  showFavoritesOnly: boolean;
+  onToggleFavorites: () => void;
+  allTags: string[];
+}
+
+function PromptFilters({
+  searchQuery,
+  onSearchChange,
+  filterTag,
+  onFilterTagChange,
+  sortBy,
+  onSortByChange,
+  showFavoritesOnly,
+  onToggleFavorites,
+  allTags,
+}: PromptFiltersProps): JSX.Element {
+  return (
+    <div className="mb-6 flex flex-col gap-4">
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex-1">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="🔍 Search prompts by name, description or tags..."
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
+          />
+        </div>
+        <div className="flex gap-2">
+          <select
+            value={filterTag}
+            onChange={(e) => onFilterTagChange(e.target.value)}
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
+          >
+            <option value="">All Tags</option>
+            {allTags.map((tag) => (
+              <option key={tag} value={tag}>
+                {tag}
+              </option>
+            ))}
+          </select>
+          <select
+            value={sortBy}
+            onChange={(e) => onSortByChange(e.target.value as 'date' | 'name')}
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
+          >
+            <option value="date">Sort by Date</option>
+            <option value="name">Sort by Name</option>
+          </select>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={onToggleFavorites}
+          className={`px-4 py-2 rounded-lg transition-colors ${
+            showFavoritesOnly
+              ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-2 border-red-500'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400 border-2 border-transparent'
+          }`}
+        >
+          {showFavoritesOnly ? '❤️ Favorites Only' : '🤍 Show All'}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 interface PromptCardProps {
   prompt: Prompt;
   onDelete: (id: string) => void;
   onDuplicate: (prompt: Prompt) => void;
+  onToggleFavorite: (id: string, isFavorite: boolean) => void;
+  onRate: (id: string, rating: number) => void;
   isDuplicating: boolean;
   isDeleting: boolean;
 }
@@ -19,13 +97,23 @@ function PromptCard({
   prompt,
   onDelete,
   onDuplicate,
+  onToggleFavorite,
+  onRate,
   isDuplicating,
   isDeleting,
 }: PromptCardProps): JSX.Element {
+  const [copied, setCopied] = useState(false);
   const promptData = prompt.jsonData as unknown as VeoPromptStructure;
   const validation = useMemo(() => validateVeoPrompt(promptData), [promptData]);
   const hasErrors = validation.warnings.some((w) => w.severity === 'error');
   const hasWarnings = validation.warnings.some((w) => w.severity === 'warning');
+
+  const handleCopyJSON = (): void => {
+    void navigator.clipboard.writeText(JSON.stringify(prompt.jsonData, null, 2)).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border-2 border-gray-200 dark:border-gray-700 hover:shadow-xl hover:border-primary-400 dark:hover:border-primary-600 transition-all overflow-hidden">
@@ -34,7 +122,14 @@ function PromptCard({
           <h3 className="text-xl font-bold text-gray-900 dark:text-white flex-1 line-clamp-2">
             {prompt.name}
           </h3>
-          <div className="ml-2">
+          <div className="flex items-center gap-2 ml-2">
+            <button
+              onClick={() => onToggleFavorite(prompt.id, !prompt.isFavorite)}
+              className="text-xl transition-transform hover:scale-125"
+              title={prompt.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+            >
+              {prompt.isFavorite ? '❤️' : '🤍'}
+            </button>
             {hasErrors && <div className="w-3 h-3 bg-red-500 rounded-full" title="Has errors" />}
             {!hasErrors && hasWarnings && (
               <div className="w-3 h-3 bg-yellow-500 rounded-full" title="Has warnings" />
@@ -49,6 +144,23 @@ function PromptCard({
           <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">
             {prompt.description}
           </p>
+        )}
+
+        <div className="mb-3">
+          <StarRating rating={prompt.rating} onRate={(rating) => onRate(prompt.id, rating)} />
+        </div>
+
+        {prompt.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-3">
+            {prompt.tags.map((tag) => (
+              <span
+                key={tag}
+                className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-1 rounded"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
         )}
 
         <div className="flex flex-wrap gap-2 mb-3">
@@ -67,8 +179,13 @@ function PromptCard({
       </div>
 
       <div className="bg-gray-50 dark:bg-gray-900 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="text-xs text-gray-500 dark:text-gray-500 mb-3">
-          Updated {new Date(prompt.updatedAt).toLocaleDateString()}
+        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-500 mb-3">
+          <span>Updated {new Date(prompt.updatedAt).toLocaleDateString()}</span>
+          {prompt.isPublic && (
+            <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded">
+              🔗 Public
+            </span>
+          )}
         </div>
         <div className="flex flex-col gap-2">
           <Link
@@ -78,6 +195,13 @@ function PromptCard({
             ✏️ Edit
           </Link>
           <div className="flex gap-2">
+            <button
+              onClick={handleCopyJSON}
+              className="flex-1 px-3 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold"
+              title="Copy JSON"
+            >
+              {copied ? '✓' : '📄'}
+            </button>
             <button
               onClick={() => onDuplicate(prompt)}
               className="flex-1 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
@@ -101,13 +225,24 @@ function PromptCard({
 
 function DashboardPage(): JSX.Element {
   const queryClient = useQueryClient();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'date' | 'name'>('date');
 
   const { data: prompts, isLoading } = useQuery({
     queryKey: ['prompts'],
     queryFn: () => promptService.getAll(),
   });
+
+  const {
+    searchQuery,
+    setSearchQuery,
+    sortBy,
+    setSortBy,
+    filterTag,
+    setFilterTag,
+    showFavoritesOnly,
+    setShowFavoritesOnly,
+    allTags,
+    filteredAndSortedPrompts,
+  } = usePromptFilters(prompts);
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => promptService.delete(id),
@@ -122,7 +257,19 @@ function DashboardPage(): JSX.Element {
         name: `${prompt.name} (Copy)`,
         description: prompt.description,
         jsonData: prompt.jsonData,
+        tags: prompt.tags,
+        isFavorite: prompt.isFavorite,
+        rating: prompt.rating,
+        isPublic: prompt.isPublic,
       }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['prompts'] });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<Prompt> }) =>
+      promptService.update(id, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['prompts'] });
     },
@@ -138,21 +285,13 @@ function DashboardPage(): JSX.Element {
     duplicateMutation.mutate(prompt);
   };
 
-  // Filter and sort prompts
-  const filteredAndSortedPrompts = prompts
-    ?.filter((prompt) => {
-      const searchLower = searchQuery.toLowerCase();
-      return (
-        prompt.name.toLowerCase().includes(searchLower) ||
-        prompt.description?.toLowerCase().includes(searchLower)
-      );
-    })
-    .sort((a, b) => {
-      if (sortBy === 'name') {
-        return a.name.localeCompare(b.name);
-      }
-      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-    });
+  const handleToggleFavorite = (id: string, isFavorite: boolean): void => {
+    updateMutation.mutate({ id, data: { isFavorite } });
+  };
+
+  const handleRate = (id: string, rating: number): void => {
+    updateMutation.mutate({ id, data: { rating } });
+  };
 
   return (
     <div>
@@ -166,29 +305,18 @@ function DashboardPage(): JSX.Element {
         </Link>
       </div>
 
-      {/* Search and Filter */}
       {prompts && prompts.length > 0 && (
-        <div className="mb-6 flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="🔍 Search prompts by name or description..."
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
-            />
-          </div>
-          <div>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'date' | 'name')}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
-            >
-              <option value="date">Sort by Date</option>
-              <option value="name">Sort by Name</option>
-            </select>
-          </div>
-        </div>
+        <PromptFilters
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          filterTag={filterTag}
+          onFilterTagChange={setFilterTag}
+          sortBy={sortBy}
+          onSortByChange={setSortBy}
+          showFavoritesOnly={showFavoritesOnly}
+          onToggleFavorites={() => setShowFavoritesOnly(!showFavoritesOnly)}
+          allTags={allTags}
+        />
       )}
 
       {isLoading && (
@@ -221,6 +349,8 @@ function DashboardPage(): JSX.Element {
               prompt={prompt}
               onDelete={handleDelete}
               onDuplicate={handleDuplicate}
+              onToggleFavorite={handleToggleFavorite}
+              onRate={handleRate}
               isDuplicating={duplicateMutation.isPending}
               isDeleting={deleteMutation.isPending}
             />
