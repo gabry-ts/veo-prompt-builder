@@ -88,7 +88,9 @@ export default {
         },
         glow: {
           '0%': { boxShadow: '0 0 20px rgba(14, 165, 233, 0.5)' },
-          '100%': { boxShadow: '0 0 30px rgba(14, 165, 233, 0.8), 0 0 40px rgba(217, 70, 239, 0.6)' },
+          '100%': {
+            boxShadow: '0 0 30px rgba(14, 165, 233, 0.8), 0 0 40px rgba(217, 70, 239, 0.6)',
+          },
         },
         shimmer: {
           '0%': { backgroundPosition: '-1000px 0' },
