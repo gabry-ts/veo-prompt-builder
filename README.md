@@ -1,7 +1,32 @@
-# Meo Veo
+# Veo Prompt Builder
 
-Web application for creating Veo 3 video prompts through an intuitive visual
-interface.
+A modern, full-stack web application for creating and managing video prompts for Google Veo 3.1. Features a glassmorphism UI with tab-based navigation, real-time validation, and comprehensive prompt templates.
+
+## Quick Start (Pre-built Images)
+
+Use pre-built Docker images for instant deployment on Intel servers:
+
+```bash
+git clone https://github.com/gabry-ts/veo-prompt-builder.git
+cd veo-prompt-builder
+cp .env.example .env
+# Edit .env with your credentials
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+Access at <http://localhost:43800>
+
+## Quick Start (Build from Source)
+
+Build images locally (supports both Intel and Apple Silicon):
+
+```bash
+git clone https://github.com/gabry-ts/veo-prompt-builder.git
+cd veo-prompt-builder
+cp .env.example .env
+# Edit .env with your credentials
+docker-compose up -d
+```
 
 ## 🌟 Key Features
 
