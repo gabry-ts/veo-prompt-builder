@@ -64,6 +64,11 @@ interface UsePromptEditorReturn {
   isLoadingVersions: boolean;
   handleRestoreVersion: (versionId: string) => void;
   lastSaved: Date | null;
+  markdownPreview: string | null;
+  showMarkdownModal: boolean;
+  handleMarkdownPreview: () => void;
+  handleMarkdownDownload: () => void;
+  handleCloseMarkdownModal: () => void;
 }
 
 const getJsonFromEditor = (
@@ -238,6 +243,8 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
   const [promptData, setPromptData] = useState<VeoPromptStructure>(emptyTemplate);
   const [jsonData, setJsonData] = useState('{}');
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [markdownPreview, setMarkdownPreview] = useState<string | null>(null);
+  const [showMarkdownModal, setShowMarkdownModal] = useState(false);
 
   const { data: prompt } = useQuery({
     queryKey: ['prompt', id],
@@ -318,6 +325,33 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
     }
   };
 
+  const handleMarkdownPreview = (): void => {
+    if (!id) return;
+    promptService
+      .exportMarkdown(id)
+      .then((markdown) => {
+        setMarkdownPreview(markdown);
+        setShowMarkdownModal(true);
+      })
+      .catch(() => alert('Failed to generate markdown'));
+  };
+
+  const handleMarkdownDownload = (): void => {
+    if (!markdownPreview) return;
+    const blob = new Blob([markdownPreview], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${name || 'prompt'}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleCloseMarkdownModal = (): void => {
+    setShowMarkdownModal(false);
+    setMarkdownPreview(null);
+  };
+
   const validationResult = useMemo(() => {
     try {
       const json = getJsonFromEditor(editorMode, promptData, jsonData);
@@ -370,5 +404,10 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
     isLoadingVersions,
     handleRestoreVersion: (versionId: string) => restoreMutation.mutate(versionId),
     lastSaved,
+    markdownPreview,
+    showMarkdownModal,
+    handleMarkdownPreview,
+    handleMarkdownDownload,
+    handleCloseMarkdownModal,
   };
 }

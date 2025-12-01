@@ -90,4 +90,14 @@ export class PromptsController {
   ): Promise<Prompt> {
     return this.promptsService.restoreVersion(id, versionId, req.user.id);
   }
+
+  @Get(':id/export/markdown')
+  @ApiOperation({ summary: 'Export prompt as markdown' })
+  async exportMarkdown(
+    @Param('id') id: string,
+    @Request() req: RequestWithUser,
+  ): Promise<{ markdown: string }> {
+    const markdown = await this.promptsService.exportToMarkdown(id, req.user.id);
+    return { markdown };
+  }
 }

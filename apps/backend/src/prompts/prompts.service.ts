@@ -162,4 +162,54 @@ export class PromptsService {
       where: { id },
     });
   }
+
+  async exportToMarkdown(id: string, userId: string): Promise<string> {
+    const prompt = await this.findOne(id, userId);
+    const data = prompt.jsonData as Record<string, unknown>;
+
+    let markdown = `# ${prompt.name}\n\n`;
+
+    if (prompt.description) {
+      markdown += `${prompt.description}\n\n`;
+    }
+
+    markdown += `---\n\n`;
+
+    if (typeof data.prompt_text === 'string' && data.prompt_text.length > 0) {
+      markdown += `## Prompt Text\n\n${data.prompt_text}\n\n`;
+    }
+
+    if (Array.isArray(data.timeline) && data.timeline.length > 0) {
+      markdown += `## Timeline\n\n`;
+      data.timeline.forEach((step: unknown, index: number) => {
+        if (typeof step === 'object' && step !== null) {
+          const typedStep = step as Record<string, unknown>;
+          markdown += `### Step ${index + 1}\n\n`;
+          Object.entries(typedStep).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && value !== '') {
+              markdown += `- **${key}**: ${JSON.stringify(value)}\n`;
+            }
+          });
+          markdown += `\n`;
+        }
+      });
+    }
+
+    if (typeof data.audio === 'object' && data.audio !== null && !Array.isArray(data.audio)) {
+      markdown += `## Audio\n\n`;
+      Object.entries(data.audio as Record<string, unknown>).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          markdown += `- **${key}**: ${JSON.stringify(value)}\n`;
+        }
+      });
+      markdown += `\n`;
+    }
+
+    markdown += `---\n\n`;
+    markdown += `**Tags**: ${prompt.tags.join(', ') || 'None'}\n`;
+    markdown += `**Rating**: ${'⭐'.repeat(prompt.rating ?? 0)}\n`;
+    markdown += `**Favorite**: ${prompt.isFavorite ? '⭐' : '❌'}\n`;
+
+    return markdown;
+  }
 }

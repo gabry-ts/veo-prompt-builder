@@ -113,6 +113,7 @@ interface MainContentGridProps {
   onJsonChange: (value: string) => void;
   onSave: () => void;
   onExport: () => void;
+  onMarkdownPreview?: () => void;
   isSaving: boolean;
   canSave: boolean;
   isEditMode: boolean;
@@ -134,6 +135,7 @@ export function MainContentGrid({
   onJsonChange,
   onSave,
   onExport,
+  onMarkdownPreview,
   isSaving,
   canSave,
   isEditMode,
@@ -158,7 +160,14 @@ export function MainContentGrid({
       {/* Right Side - Validation & Actions (1 column) */}
       <div className="space-y-6">
         {/* Actions Card */}
-        <EditorActions onSave={onSave} onExport={onExport} isSaving={isSaving} canSave={canSave} />
+        <EditorActions
+          onSave={onSave}
+          onExport={onExport}
+          onMarkdownPreview={onMarkdownPreview}
+          isSaving={isSaving}
+          canSave={canSave}
+          isEditMode={isEditMode}
+        />
 
         {/* Share Section (only in edit mode) */}
         {isEditMode && (

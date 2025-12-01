@@ -40,4 +40,9 @@ export const promptService = {
     const response = await api.post<Prompt>(`/prompts/${id}/versions/${versionId}/restore`);
     return response.data;
   },
+
+  exportMarkdown: async (id: string): Promise<string> => {
+    const response = await api.get<{ markdown: string }>(`/prompts/${id}/export/markdown`);
+    return response.data.markdown;
+  },
 };

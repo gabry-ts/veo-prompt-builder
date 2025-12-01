@@ -1,6 +1,11 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { getValidationSummary } from '../utils/veoValidation';
-import { PageHeader, BasicInfoForm, MetadataForm } from './helpers/PromptEditorHelpers';
+import {
+  PageHeader,
+  BasicInfoForm,
+  MetadataForm,
+  MarkdownPreviewModal,
+} from './helpers/PromptEditorHelpers';
 import {
   TemplatesSection,
   MainContentGrid,
@@ -44,6 +49,11 @@ function PromptEditorPage(): JSX.Element {
     isLoadingVersions,
     handleRestoreVersion,
     lastSaved,
+    markdownPreview,
+    showMarkdownModal,
+    handleMarkdownPreview,
+    handleMarkdownDownload,
+    handleCloseMarkdownModal,
   } = usePromptEditor({ id, onNavigate: navigate });
 
   return (
@@ -90,6 +100,7 @@ function PromptEditorPage(): JSX.Element {
         onJsonChange={setJsonData}
         onSave={handleSave}
         onExport={handleExport}
+        onMarkdownPreview={handleMarkdownPreview}
         isSaving={isSaving}
         canSave={!!name}
         isEditMode={isEditMode}
@@ -100,6 +111,13 @@ function PromptEditorPage(): JSX.Element {
         isLoadingVersions={isLoadingVersions}
         onRestoreVersion={handleRestoreVersion}
       />
+      {showMarkdownModal && markdownPreview !== null && (
+        <MarkdownPreviewModal
+          markdown={markdownPreview}
+          onClose={handleCloseMarkdownModal}
+          onDownload={handleMarkdownDownload}
+        />
+      )}
     </div>
   );
 }

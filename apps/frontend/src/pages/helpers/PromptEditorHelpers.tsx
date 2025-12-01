@@ -115,15 +115,19 @@ export function EditorModeToggle({
 interface EditorActionsProps {
   onSave: () => void;
   onExport: () => void;
+  onMarkdownPreview?: () => void;
   isSaving: boolean;
   canSave: boolean;
+  isEditMode: boolean;
 }
 
 export function EditorActions({
   onSave,
   onExport,
+  onMarkdownPreview,
   isSaving,
   canSave,
+  isEditMode,
 }: EditorActionsProps): JSX.Element {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 p-6 sticky top-4">
@@ -142,6 +146,14 @@ export function EditorActions({
         >
           📥 Export JSON
         </button>
+        {isEditMode && onMarkdownPreview !== undefined && (
+          <button
+            onClick={onMarkdownPreview}
+            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-semibold"
+          >
+            📄 Export Markdown
+          </button>
+        )}
       </div>
     </div>
   );
@@ -528,6 +540,55 @@ export function VersionHistory({
     <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 p-6">
       <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">📜 Version History</h2>
       {renderContent()}
+    </div>
+  );
+}
+
+interface MarkdownPreviewModalProps {
+  markdown: string;
+  onClose: () => void;
+  onDownload: () => void;
+}
+
+export function MarkdownPreviewModal({
+  markdown,
+  onClose,
+  onDownload,
+}: MarkdownPreviewModalProps): JSX.Element {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+        <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">📄 Markdown Preview</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-2xl"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6">
+          <pre className="whitespace-pre-wrap font-mono text-sm bg-gray-50 dark:bg-gray-900 p-4 rounded-lg text-gray-900 dark:text-white">
+            {markdown}
+          </pre>
+        </div>
+
+        <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex gap-4">
+          <button
+            onClick={onDownload}
+            className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+          >
+            📥 Download Markdown
+          </button>
+          <button
+            onClick={onClose}
+            className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-semibold"
+          >
+            Close
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
