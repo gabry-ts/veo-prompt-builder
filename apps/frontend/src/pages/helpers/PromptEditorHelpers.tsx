@@ -555,6 +555,14 @@ export function MarkdownPreviewModal({
   onClose,
   onDownload,
 }: MarkdownPreviewModalProps): JSX.Element {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (): void => {
+    void navigator.clipboard.writeText(markdown);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-800 rounded-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
@@ -575,6 +583,12 @@ export function MarkdownPreviewModal({
         </div>
 
         <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex gap-4">
+          <button
+            onClick={handleCopy}
+            className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+          >
+            {copied ? '✓ Copied!' : '📋 Copy to Clipboard'}
+          </button>
           <button
             onClick={onDownload}
             className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
