@@ -163,16 +163,50 @@ export class PromptsService {
     });
   }
 
+  private extractPromptData(rawData: Record<string, unknown>): Record<string, unknown> {
+    return rawData.prompt !== null &&
+      rawData.prompt !== undefined &&
+      typeof rawData.prompt === 'object' &&
+      !Array.isArray(rawData.prompt)
+      ? (rawData.prompt as Record<string, unknown>)
+      : rawData;
+  }
+
+  private buildTimelineMarkdown(timeline: unknown[]): string {
+    let markdown = `## Timeline\n\n`;
+    timeline.forEach((step: unknown, index: number) => {
+      if (typeof step === 'object' && step !== null) {
+        const typedStep = step as Record<string, unknown>;
+        markdown += `### Step ${index + 1}\n\n`;
+        Object.entries(typedStep).forEach(([key, value]) => {
+          if (value !== null && value !== undefined && value !== '') {
+            markdown += `- **${key}**: ${JSON.stringify(value)}\n`;
+          }
+        });
+        markdown += `\n`;
+      }
+    });
+    return markdown;
+  }
+
+  private buildAudioMarkdown(audio: Record<string, unknown>): string {
+    let markdown = `## Audio\n\n`;
+    Object.entries(audio).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== '') {
+        markdown += `- **${key}**: ${JSON.stringify(value)}\n`;
+      }
+    });
+    return `${markdown}\n`;
+  }
+
   async exportToMarkdown(id: string, userId: string): Promise<string> {
     const prompt = await this.findOne(id, userId);
-    const data = prompt.jsonData as Record<string, unknown>;
+    const data = this.extractPromptData(prompt.jsonData as Record<string, unknown>);
 
     let markdown = `# ${prompt.name}\n\n`;
-
     if (prompt.description) {
       markdown += `${prompt.description}\n\n`;
     }
-
     markdown += `---\n\n`;
 
     if (typeof data.prompt_text === 'string' && data.prompt_text.length > 0) {
@@ -180,29 +214,11 @@ export class PromptsService {
     }
 
     if (Array.isArray(data.timeline) && data.timeline.length > 0) {
-      markdown += `## Timeline\n\n`;
-      data.timeline.forEach((step: unknown, index: number) => {
-        if (typeof step === 'object' && step !== null) {
-          const typedStep = step as Record<string, unknown>;
-          markdown += `### Step ${index + 1}\n\n`;
-          Object.entries(typedStep).forEach(([key, value]) => {
-            if (value !== null && value !== undefined && value !== '') {
-              markdown += `- **${key}**: ${JSON.stringify(value)}\n`;
-            }
-          });
-          markdown += `\n`;
-        }
-      });
+      markdown += this.buildTimelineMarkdown(data.timeline);
     }
 
     if (typeof data.audio === 'object' && data.audio !== null && !Array.isArray(data.audio)) {
-      markdown += `## Audio\n\n`;
-      Object.entries(data.audio as Record<string, unknown>).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && value !== '') {
-          markdown += `- **${key}**: ${JSON.stringify(value)}\n`;
-        }
-      });
-      markdown += `\n`;
+      markdown += this.buildAudioMarkdown(data.audio as Record<string, unknown>);
     }
 
     markdown += `---\n\n`;
