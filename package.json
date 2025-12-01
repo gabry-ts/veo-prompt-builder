@@ -1,0 +1,62 @@
+{
+  "name": "meo-veo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Veo JSON Prompt Builder - Web application for creating Veo 3 video prompts",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "lint": "yarn workspaces run lint",
+    "lint:check": "yarn workspaces run lint:check",
+    "lint:md": "markdownlint \"docs/**/*.md\" \"*.md\"",
+    "lint:md:fix": "markdownlint --fix \"docs/**/*.md\" \"*.md\"",
+    "test": "yarn workspaces run test",
+    "build": "yarn workspaces run build",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "type-check": "yarn workspaces run type-check",
+    "clean": "yarn workspaces run clean && rm -rf node_modules",
+    "prepare": "husky",
+    "dev:backend": "yarn workspace @meo-veo/backend dev",
+    "dev:frontend": "yarn workspace @meo-veo/frontend dev",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:build": "docker-compose build",
+    "cpd": "yarn workspace @meo-veo/backend cpd && yarn workspace @meo-veo/frontend cpd"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "husky": "^9.1.7",
+    "jscpd": "^4.0.5",
+    "lint-staged": "^16.2.7",
+    "markdownlint-cli": "^0.46.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "yarn": ">=1.22.0"
+  },
+  "packageManager": "yarn@1.22.19",
+  "lint-staged": {
+    "apps/backend/src/**/*.ts": [
+      "prettier --write",
+      "eslint --fix --max-warnings=0"
+    ],
+    "apps/frontend/src/**/*.{ts,tsx}": [
+      "prettier --write",
+      "eslint --fix --max-warnings=0"
+    ],
+    "**/*.md": [
+      "prettier --write",
+      "markdownlint --fix"
+    ]
+  }
+}

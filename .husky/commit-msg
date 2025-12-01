@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# Conventional commits validation
+# Format: type(scope?): message
+# Types: feat, fix, docs, style, refactor, test, chore, perf, ci, build, hotfix, bugfix
+
+commit_msg=$(cat "$1")
+
+# Pattern: type(optional-scope): message (min 3 chars)
+pattern="^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|hotfix|bugfix)(\(.+\))?: .{3,}$"
+
+if ! echo "$commit_msg" | grep -qE "$pattern"; then
+  echo "❌ Invalid commit message format!"
+  echo ""
+  echo "Expected: type(scope?): message"
+  echo ""
+  echo "Types: feat, fix, docs, style, refactor, test, chore, perf, ci, build, hotfix, bugfix"
+  echo ""
+  echo "Examples:"
+  echo "  feat: add user authentication"
+  echo "  fix(api): resolve null pointer exception"
+  echo "  chore: update dependencies"
+  echo ""
+  echo "Your message: $commit_msg"
+  exit 1
+fi

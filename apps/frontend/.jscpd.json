@@ -1,0 +1,7 @@
+{
+  "threshold": 5,
+  "reporters": ["console"],
+  "ignore": ["**/__tests__/**", "**/*.spec.ts", "**/*.test.ts", "**/node_modules/**", "**/dist/**"],
+  "absolute": true,
+  "gitignore": true
+}

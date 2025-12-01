@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: meoveo-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: meoveo
+      POSTGRES_PASSWORD: meoveo
+      POSTGRES_DB: meoveo
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - meoveo-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U meoveo']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+      platforms:
+        - linux/amd64
+    container_name: meoveo-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://meoveo:meoveo@postgres:5432/meoveo?schema=public
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      PORT: 3000
+      NODE_ENV: production
+      DEFAULT_USER_EMAIL: ${DEFAULT_USER_EMAIL}
+      DEFAULT_USER_PASSWORD: ${DEFAULT_USER_PASSWORD}
+      DEFAULT_USER_NAME: ${DEFAULT_USER_NAME}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - meoveo-network
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/docs']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      platforms:
+        - linux/amd64
+    container_name: meoveo-frontend
+    restart: unless-stopped
+    networks:
+      - meoveo-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: meoveo-nginx
+    restart: unless-stopped
+    ports:
+      - '43800:80'
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - meoveo-network
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost/api/docs']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  meoveo-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

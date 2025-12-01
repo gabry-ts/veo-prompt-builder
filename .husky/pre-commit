@@ -1,0 +1,20 @@
+#!/bin/sh
+
+echo "🔍 Running pre-commit checks..."
+
+# Run lint-staged (only on staged files - much faster)
+npx lint-staged || exit 1
+
+# Parallel type-check (no emit, faster than full build)
+echo "\n🏗️  Type checking in parallel..."
+npm run type-check || exit 1
+
+# Copy-paste detection
+echo "\n🔎 Running copy-paste detection..."
+yarn cpd || exit 1
+
+# Markdown lint validation
+echo "\n📝 Running markdown lint..."
+npm run lint:md || exit 1
+
+echo "\n✅ All checks passed!"
