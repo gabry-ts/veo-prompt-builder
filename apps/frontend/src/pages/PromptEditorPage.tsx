@@ -1,5 +1,4 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { getValidationSummary } from '../utils/veoValidation';
 import {
   PageHeader,
   BasicInfoForm,
@@ -95,7 +94,6 @@ function PromptEditorPage(): JSX.Element {
         promptData={promptData}
         jsonData={jsonData}
         validationResult={validationResult}
-        getValidationSummary={getValidationSummary}
         onPromptChange={handlePromptChange}
         onJsonChange={setJsonData}
         onSave={handleSave}
