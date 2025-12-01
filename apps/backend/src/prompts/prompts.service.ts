@@ -57,7 +57,18 @@ export class PromptsService {
   }
 
   async update(id: string, userId: string, updatePromptDto: UpdatePromptDto): Promise<Prompt> {
-    await this.findOne(id, userId);
+    const existingPrompt = await this.findOne(id, userId);
+
+    // Create version before updating if jsonData changed
+    if (updatePromptDto.jsonData !== undefined) {
+      await this.createVersion(existingPrompt);
+    }
+
+    // Generate shareToken if prompt is being made public and doesn't have one
+    let shareToken = existingPrompt.shareToken;
+    if (updatePromptDto.isPublic === true && !shareToken) {
+      shareToken = this.generateShareToken();
+    }
 
     return this.prisma.prompt.update({
       where: { id },
@@ -69,6 +80,77 @@ export class PromptsService {
         isFavorite: updatePromptDto.isFavorite,
         rating: updatePromptDto.rating,
         isPublic: updatePromptDto.isPublic,
+        shareToken,
+      },
+    });
+  }
+
+  private async createVersion(prompt: Prompt): Promise<void> {
+    const latestVersion = await this.prisma.promptVersion.findFirst({
+      where: { promptId: prompt.id },
+      orderBy: { version: 'desc' },
+    });
+
+    const nextVersion = (latestVersion?.version ?? 0) + 1;
+
+    await this.prisma.promptVersion.create({
+      data: {
+        promptId: prompt.id,
+        name: prompt.name,
+        description: prompt.description,
+        jsonData: prompt.jsonData as Prisma.InputJsonValue,
+        version: nextVersion,
+      },
+    });
+  }
+
+  async getVersions(
+    promptId: string,
+    userId: string,
+  ): Promise<
+    Array<{
+      id: string;
+      version: number;
+      name: string;
+      description: string | null;
+      createdAt: Date;
+    }>
+  > {
+    await this.findOne(promptId, userId);
+
+    return this.prisma.promptVersion.findMany({
+      where: { promptId },
+      orderBy: { version: 'desc' },
+      select: {
+        id: true,
+        version: true,
+        name: true,
+        description: true,
+        createdAt: true,
+      },
+    });
+  }
+
+  async restoreVersion(promptId: string, versionId: string, userId: string): Promise<Prompt> {
+    const prompt = await this.findOne(promptId, userId);
+
+    const version = await this.prisma.promptVersion.findUnique({
+      where: { id: versionId },
+    });
+
+    if (!version || version.promptId !== promptId) {
+      throw new NotFoundException('Version not found');
+    }
+
+    // Create a version of current state before restoring
+    await this.createVersion(prompt);
+
+    return this.prisma.prompt.update({
+      where: { id: promptId },
+      data: {
+        name: version.name,
+        description: version.description,
+        jsonData: version.jsonData as Prisma.InputJsonValue,
       },
     });
   }

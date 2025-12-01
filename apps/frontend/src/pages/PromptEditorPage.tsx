@@ -39,6 +39,11 @@ function PromptEditorPage(): JSX.Element {
     handleSave,
     handleExport,
     isSaving,
+    shareUrl,
+    versions,
+    isLoadingVersions,
+    handleRestoreVersion,
+    lastSaved,
   } = usePromptEditor({ id, onNavigate: navigate });
 
   return (
@@ -87,6 +92,13 @@ function PromptEditorPage(): JSX.Element {
         onExport={handleExport}
         isSaving={isSaving}
         canSave={!!name}
+        isEditMode={isEditMode}
+        shareUrl={shareUrl}
+        isPublic={isPublic}
+        lastSaved={lastSaved}
+        versions={versions}
+        isLoadingVersions={isLoadingVersions}
+        onRestoreVersion={handleRestoreVersion}
       />
     </div>
   );

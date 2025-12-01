@@ -63,4 +63,31 @@ export class PromptsController {
   async remove(@Param('id') id: string, @Request() req: RequestWithUser): Promise<void> {
     return this.promptsService.remove(id, req.user.id);
   }
+
+  @Get(':id/versions')
+  @ApiOperation({ summary: 'Get all versions of a prompt' })
+  async getVersions(
+    @Param('id') id: string,
+    @Request() req: RequestWithUser,
+  ): Promise<
+    Array<{
+      id: string;
+      version: number;
+      name: string;
+      description: string | null;
+      createdAt: Date;
+    }>
+  > {
+    return this.promptsService.getVersions(id, req.user.id);
+  }
+
+  @Post(':id/versions/:versionId/restore')
+  @ApiOperation({ summary: 'Restore a specific version of a prompt' })
+  async restoreVersion(
+    @Param('id') id: string,
+    @Param('versionId') versionId: string,
+    @Request() req: RequestWithUser,
+  ): Promise<Prompt> {
+    return this.promptsService.restoreVersion(id, versionId, req.user.id);
+  }
 }

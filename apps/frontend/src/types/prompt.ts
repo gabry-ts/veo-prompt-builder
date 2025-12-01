@@ -32,3 +32,11 @@ export interface UpdatePromptRequest {
   rating?: number;
   isPublic?: boolean;
 }
+
+export interface PromptVersion {
+  id: string;
+  version: number;
+  name: string;
+  description: string | null;
+  createdAt: string;
+}

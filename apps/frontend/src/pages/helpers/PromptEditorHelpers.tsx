@@ -2,6 +2,7 @@ import { useState } from 'react';
 import TemplateCarousel from '../../components/PromptBuilder/TemplateCarousel';
 import StarRating from '../../components/StarRating';
 import type { TemplateDomain } from '../../data/veoTemplates';
+import type { PromptVersion } from '../../types/prompt';
 import type { ValidationResult } from '../../utils/veoValidation';
 
 interface TemplateSelectorProps {
@@ -415,6 +416,118 @@ export function ValidationCard({
         )}
       </h2>
       {children}
+    </div>
+  );
+}
+
+interface ShareSectionProps {
+  shareUrl: string | undefined;
+  isPublic: boolean;
+  lastSaved: Date | null;
+}
+
+export function ShareSection({ shareUrl, isPublic, lastSaved }: ShareSectionProps): JSX.Element {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (): void => {
+    if (shareUrl !== undefined) {
+      void navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 p-6">
+      <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">🔗 Share</h2>
+      {isPublic && shareUrl !== undefined ? (
+        <div>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Public share link:</p>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={shareUrl}
+              readOnly
+              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-sm"
+            />
+            <button
+              onClick={handleCopy}
+              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-semibold"
+            >
+              {copied ? '✓ Copied!' : '📋 Copy'}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Enable &quot;Public&quot; in metadata to generate a share link
+        </p>
+      )}
+      {lastSaved !== null && (
+        <p className="text-xs text-gray-500 dark:text-gray-500 mt-3">
+          Last autosaved: {lastSaved.toLocaleTimeString()}
+        </p>
+      )}
+    </div>
+  );
+}
+
+interface VersionHistoryProps {
+  versions: PromptVersion[];
+  isLoading: boolean;
+  onRestore: (versionId: string) => void;
+}
+
+export function VersionHistory({
+  versions,
+  isLoading,
+  onRestore,
+}: VersionHistoryProps): JSX.Element {
+  const renderContent = (): JSX.Element => {
+    if (isLoading) {
+      return <p className="text-sm text-gray-600 dark:text-gray-400">Loading versions...</p>;
+    }
+
+    if (versions.length === 0) {
+      return (
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          No previous versions yet. Versions are created automatically when you edit the prompt.
+        </p>
+      );
+    }
+
+    return (
+      <div className="space-y-2 max-h-96 overflow-y-auto">
+        {versions.map((version) => (
+          <div
+            key={version.id}
+            className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"
+          >
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                Version {version.version}
+              </p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">{version.name}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-500">
+                {new Date(version.createdAt).toLocaleString()}
+              </p>
+            </div>
+            <button
+              onClick={() => onRestore(version.id)}
+              className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-semibold"
+            >
+              Restore
+            </button>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 p-6">
+      <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">📜 Version History</h2>
+      {renderContent()}
     </div>
   );
 }
