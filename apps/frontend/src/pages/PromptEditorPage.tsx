@@ -1,10 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { getValidationSummary } from '../utils/veoValidation';
 import {
   PageHeader,
   BasicInfoForm,
-  MetadataForm,
   MarkdownPreviewModal,
+  JsonPreviewModal,
 } from './helpers/PromptEditorHelpers';
 import {
   TemplatesSection,
@@ -23,13 +22,13 @@ function PromptEditorPage(): JSX.Element {
     description,
     setDescription,
     tags,
-    setTags,
+    handleTagsChange,
     isFavorite,
     setIsFavorite,
     rating,
     setRating,
     isPublic,
-    setIsPublic,
+    handlePublicChange,
     editorMode,
     setEditorMode,
     showTemplateSelector,
@@ -54,6 +53,10 @@ function PromptEditorPage(): JSX.Element {
     handleMarkdownPreview,
     handleMarkdownDownload,
     handleCloseMarkdownModal,
+    jsonPreview,
+    showJsonModal,
+    handleJsonDownload,
+    handleCloseJsonModal,
   } = usePromptEditor({ id, onNavigate: navigate });
 
   return (
@@ -64,16 +67,6 @@ function PromptEditorPage(): JSX.Element {
         description={description}
         onNameChange={setName}
         onDescriptionChange={setDescription}
-      />
-      <MetadataForm
-        tags={tags}
-        onTagsChange={setTags}
-        isFavorite={isFavorite}
-        onFavoriteChange={setIsFavorite}
-        rating={rating}
-        onRatingChange={setRating}
-        isPublic={isPublic}
-        onPublicChange={setIsPublic}
       />
       <TemplatesSection
         isEditMode={isEditMode}
@@ -95,7 +88,6 @@ function PromptEditorPage(): JSX.Element {
         promptData={promptData}
         jsonData={jsonData}
         validationResult={validationResult}
-        getValidationSummary={getValidationSummary}
         onPromptChange={handlePromptChange}
         onJsonChange={setJsonData}
         onSave={handleSave}
@@ -106,16 +98,30 @@ function PromptEditorPage(): JSX.Element {
         isEditMode={isEditMode}
         shareUrl={shareUrl}
         isPublic={isPublic}
+        onPublicChange={handlePublicChange}
+        rating={rating}
+        onRatingChange={setRating}
+        isFavorite={isFavorite}
+        onFavoriteChange={setIsFavorite}
         lastSaved={lastSaved}
         versions={versions}
         isLoadingVersions={isLoadingVersions}
         onRestoreVersion={handleRestoreVersion}
+        tags={tags}
+        onTagsChange={handleTagsChange}
       />
       {showMarkdownModal && markdownPreview !== null && (
         <MarkdownPreviewModal
           markdown={markdownPreview}
           onClose={handleCloseMarkdownModal}
           onDownload={handleMarkdownDownload}
+        />
+      )}
+      {showJsonModal && jsonPreview !== null && (
+        <JsonPreviewModal
+          json={jsonPreview}
+          onClose={handleCloseJsonModal}
+          onDownload={handleJsonDownload}
         />
       )}
     </div>

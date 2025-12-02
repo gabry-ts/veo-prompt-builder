@@ -1,3 +1,4 @@
+import { FileText } from 'lucide-react';
 import type { VeoPromptStructure } from '../../data/veoTemplates';
 import CollapsibleSection from './CollapsibleSection';
 
@@ -39,7 +40,7 @@ function CoreFormulaStep({ data, onChange }: CoreFormulaStepProps): JSX.Element 
   return (
     <CollapsibleSection
       title="Core 5-Part Formula"
-      icon="📝"
+      icon={<FileText className="w-5 h-5" />}
       defaultOpen={true}
       completionStatus={completionStatus}
       required={true}

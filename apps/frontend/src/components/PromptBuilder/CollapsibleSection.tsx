@@ -3,7 +3,7 @@ import { ChevronDown, Circle, CircleDot, CheckCircle2, Sparkles } from 'lucide-r
 
 interface CollapsibleSectionProps {
   title: string;
-  icon?: string;
+  icon?: ReactNode;
   children: ReactNode;
   defaultOpen?: boolean;
   completionStatus?: 'empty' | 'partial' | 'complete';

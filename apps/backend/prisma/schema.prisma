@@ -13,14 +13,15 @@ enum UserRole {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
+  id        String     @id @default(cuid())
+  email     String     @unique
   password  String
   name      String?
-  role      UserRole @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  role      UserRole   @default(USER)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   prompts   Prompt[]
+  auditLogs AuditLog[]
 
   @@map("users")
 }
@@ -58,4 +59,20 @@ model PromptVersion {
 
   @@index([promptId])
   @@map("prompt_versions")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String
+  entity    String
+  entityId  String
+  changes   Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
 }

@@ -1,3 +1,4 @@
+import { Ban, Palette, Clipboard } from 'lucide-react';
 import type { VeoPromptStructure } from '../../data/veoTemplates';
 import CollapsibleSection from './CollapsibleSection';
 
@@ -46,7 +47,7 @@ function AdvancedStep({ data, onChange }: AdvancedStepProps): JSX.Element {
     <div className="space-y-4">
       <CollapsibleSection
         title="Negative Prompt"
-        icon="🚫"
+        icon={<Ban className="w-5 h-5" />}
         defaultOpen={false}
         completionStatus={data.prompt.negative_prompt ? 'complete' : 'empty'}
       >
@@ -69,7 +70,7 @@ function AdvancedStep({ data, onChange }: AdvancedStepProps): JSX.Element {
 
       <CollapsibleSection
         title="Creative Controls & Mode"
-        icon="🎨"
+        icon={<Palette className="w-5 h-5" />}
         defaultOpen={false}
         completionStatus={data.prompt.creative_controls?.mode ? 'complete' : 'empty'}
       >
@@ -116,7 +117,7 @@ function AdvancedStep({ data, onChange }: AdvancedStepProps): JSX.Element {
 
       <CollapsibleSection
         title="Technical Notes"
-        icon="📋"
+        icon={<Clipboard className="w-5 h-5" />}
         defaultOpen={false}
         completionStatus={data.prompt.notes ? 'complete' : 'empty'}
       >

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
+import { createElement } from 'react';
+import { Save } from 'lucide-react';
 
 interface UseAutoSaveOptions<T> {
   data: T;
@@ -30,7 +32,7 @@ export function useAutoSave<T>({
       lastSavedRef.current = new Date();
       toast.success('Auto-saved successfully', {
         duration: 2000,
-        icon: '💾',
+        icon: createElement(Save, { className: 'w-5 h-5' }),
       });
     } catch (error) {
       console.error('Auto-save failed:', error);

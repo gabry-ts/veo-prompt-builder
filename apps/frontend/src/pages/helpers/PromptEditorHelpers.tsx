@@ -1,6 +1,24 @@
 import { useState } from 'react';
+import {
+  BookOpen,
+  X,
+  Clapperboard,
+  Palette,
+  FileText,
+  Download,
+  Save,
+  Clock,
+  Check,
+  Clipboard,
+  Globe,
+  Link,
+  Scroll,
+  Package,
+  ArrowDown,
+  Edit,
+  Sparkles,
+} from 'lucide-react';
 import TemplateCarousel from '../../components/PromptBuilder/TemplateCarousel';
-import StarRating from '../../components/StarRating';
 import type { TemplateDomain } from '../../data/veoTemplates';
 import type { PromptVersion } from '../../types/prompt';
 import type { ValidationResult } from '../../utils/veoValidation';
@@ -17,12 +35,14 @@ export function TemplateSelector({
   return (
     <div className="mb-8 bg-white dark:bg-gray-800 rounded-xl border-2 border-purple-300 dark:border-purple-700 p-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">📚 Choose a Template</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <BookOpen className="w-6 h-6" /> Choose a Template
+        </h2>
         <button
           onClick={onClose}
-          className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+          className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 flex items-center gap-1"
         >
-          ✕ Close
+          <X className="w-4 h-4" /> Close
         </button>
       </div>
       <TemplateCarousel onSelectTemplate={onSelectTemplate} />
@@ -38,16 +58,16 @@ interface WelcomeTemplateProps {
 export function WelcomeTemplate({ onSelectTemplate, onSkip }: WelcomeTemplateProps): JSX.Element {
   return (
     <div className="mb-8 bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 p-6">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-        🎬 Start from a Template
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+        <Clapperboard className="w-6 h-6" /> Start from a Template
       </h2>
       <TemplateCarousel onSelectTemplate={onSelectTemplate} />
       <div className="mt-4 text-center">
         <button
           onClick={onSkip}
-          className="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+          className="text-sm text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1 mx-auto"
         >
-          Or start from scratch ↓
+          Or start from scratch <ArrowDown className="w-3 h-3" />
         </button>
       </div>
     </div>
@@ -72,23 +92,23 @@ export function EditorModeToggle({
       <div className="flex bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
         <button
           onClick={() => onModeChange('visual')}
-          className={`px-4 py-2 rounded-lg transition-all font-semibold ${
+          className={`px-4 py-2 rounded-lg transition-all font-semibold flex items-center gap-2 ${
             editorMode === 'visual'
               ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-lg'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
           }`}
         >
-          🎨 Visual Builder
+          <Palette className="w-4 h-4" /> Visual Builder
         </button>
         <button
           onClick={() => onModeChange('json')}
-          className={`px-4 py-2 rounded-lg transition-all font-semibold ${
+          className={`px-4 py-2 rounded-lg transition-all font-semibold flex items-center gap-2 ${
             editorMode === 'json'
               ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-lg'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
           }`}
         >
-          📝 JSON Editor
+          <FileText className="w-4 h-4" /> JSON Editor
         </button>
       </div>
 
@@ -96,15 +116,15 @@ export function EditorModeToggle({
         <>
           <button
             onClick={onShowTemplates}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold"
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold flex items-center gap-2"
           >
-            📚 Templates
+            <BookOpen className="w-4 h-4" /> Templates
           </button>
           <button
             onClick={onImportJson}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold flex items-center gap-2"
           >
-            📥 Import JSON
+            <Download className="w-4 h-4" /> Import JSON
           </button>
         </>
       )}
@@ -131,158 +151,39 @@ export function EditorActions({
 }: EditorActionsProps): JSX.Element {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 p-6 sticky top-4">
-      <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">💾 Save & Export</h2>
+      <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+        <Save className="w-5 h-5" /> Save & Export
+      </h2>
       <div className="flex flex-col gap-3">
         <button
           onClick={onSave}
           disabled={!canSave || isSaving}
-          className="w-full px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-bold shadow-lg hover:shadow-xl"
+          className="w-full px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-bold shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
         >
-          {isSaving ? '⏳ Saving...' : '💾 Save Prompt'}
+          {isSaving ? (
+            <>
+              <Clock className="w-4 h-4" /> Saving...
+            </>
+          ) : (
+            <>
+              <Save className="w-4 h-4" /> Save Prompt
+            </>
+          )}
         </button>
         <button
           onClick={onExport}
-          className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all font-semibold"
+          className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all font-semibold flex items-center justify-center gap-2"
         >
-          📥 Export JSON
+          <Download className="w-4 h-4" /> Export JSON
         </button>
         {isEditMode && onMarkdownPreview !== undefined && (
           <button
             onClick={onMarkdownPreview}
-            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-semibold"
+            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-semibold flex items-center justify-center gap-2"
           >
-            📄 Export Markdown
+            <FileText className="w-4 h-4" /> Export Markdown
           </button>
         )}
-      </div>
-    </div>
-  );
-}
-
-interface MetadataFormProps {
-  tags: string[];
-  onTagsChange: (tags: string[]) => void;
-  isFavorite: boolean;
-  onFavoriteChange: (favorite: boolean) => void;
-  rating: number | undefined;
-  onRatingChange: (rating: number | undefined) => void;
-  isPublic: boolean;
-  onPublicChange: (isPublic: boolean) => void;
-}
-
-export function MetadataForm({
-  tags,
-  onTagsChange,
-  isFavorite,
-  onFavoriteChange,
-  rating,
-  onRatingChange,
-  isPublic,
-  onPublicChange,
-}: MetadataFormProps): JSX.Element {
-  const [tagInput, setTagInput] = useState('');
-
-  const handleAddTag = (): void => {
-    const trimmed = tagInput.trim();
-    if (trimmed !== '' && !tags.includes(trimmed)) {
-      onTagsChange([...tags, trimmed]);
-      setTagInput('');
-    }
-  };
-
-  const handleRemoveTag = (tagToRemove: string): void => {
-    onTagsChange(tags.filter((tag) => tag !== tagToRemove));
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddTag();
-    }
-  };
-
-  return (
-    <div className="mb-6 bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 p-6">
-      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Metadata</h3>
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Tags
-          </label>
-          <div className="flex gap-2 mb-2">
-            <input
-              type="text"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Add a tag..."
-              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
-            />
-            <button
-              onClick={handleAddTag}
-              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-semibold"
-            >
-              Add
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {tags.map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex items-center gap-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-3 py-1 rounded-full text-sm"
-              >
-                {tag}
-                <button
-                  onClick={() => handleRemoveTag(tag)}
-                  className="hover:text-emerald-900 dark:hover:text-emerald-200"
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Rating
-            </label>
-            <StarRating rating={rating} onRate={onRatingChange} />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="isFavorite"
-              checked={isFavorite}
-              onChange={(e) => onFavoriteChange(e.target.checked)}
-              className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-            />
-            <label
-              htmlFor="isFavorite"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              ❤️ Favorite
-            </label>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="isPublic"
-              checked={isPublic}
-              onChange={(e) => onPublicChange(e.target.checked)}
-              className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-            />
-            <label
-              htmlFor="isPublic"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              🔗 Public
-            </label>
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -297,8 +198,16 @@ export function PageHeader({ isEditMode, onBack }: PageHeaderProps): JSX.Element
   return (
     <div className="flex justify-between items-center mb-6">
       <div>
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-          {isEditMode ? '✏️ Edit Prompt' : '✨ Create New Prompt'}
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
+          {isEditMode ? (
+            <>
+              <Edit className="w-9 h-9" /> Edit Prompt
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-9 h-9" /> Create New Prompt
+            </>
+          )}
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
           Build professional Veo 3.1 video prompts with ease
@@ -375,9 +284,9 @@ export function JsonEditor({ value, onChange }: JsonEditorProps): JSX.Element {
     <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 p-6">
       <label
         htmlFor="json"
-        className="block text-lg font-semibold text-gray-900 dark:text-white mb-4"
+        className="block text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2"
       >
-        📝 JSON Data *
+        <FileText className="w-5 h-5" /> JSON Data *
       </label>
       <textarea
         id="json"
@@ -398,7 +307,9 @@ interface JsonPreviewProps {
 export function JsonPreview({ data }: JsonPreviewProps): JSX.Element {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 p-6">
-      <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">📄 JSON Preview</h2>
+      <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+        <FileText className="w-5 h-5" /> JSON Preview
+      </h2>
       <pre className="text-xs text-gray-800 dark:text-gray-200 overflow-auto bg-gray-50 dark:bg-gray-900 p-4 rounded-lg whitespace-pre-wrap break-words max-h-96 border border-gray-200 dark:border-gray-700">
         {JSON.stringify(data, null, 2)}
       </pre>
@@ -419,8 +330,8 @@ export function ValidationCard({
 }: ValidationCardProps): JSX.Element {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 p-6">
-      <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-        ✅ Validation
+      <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+        <Check className="w-5 h-5" /> Validation
         {validationResult.warnings.length > 0 && (
           <span className="text-sm font-normal ml-2 text-gray-600 dark:text-gray-400">
             ({getValidationSummary(validationResult)})
@@ -435,10 +346,16 @@ export function ValidationCard({
 interface ShareSectionProps {
   shareUrl: string | undefined;
   isPublic: boolean;
+  onPublicChange: (isPublic: boolean) => void;
   lastSaved: Date | null;
 }
 
-export function ShareSection({ shareUrl, isPublic, lastSaved }: ShareSectionProps): JSX.Element {
+export function ShareSection({
+  shareUrl,
+  isPublic,
+  onPublicChange,
+  lastSaved,
+}: ShareSectionProps): JSX.Element {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = (): void => {
@@ -451,7 +368,26 @@ export function ShareSection({ shareUrl, isPublic, lastSaved }: ShareSectionProp
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 p-6">
-      <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">🔗 Share</h2>
+      <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+        <Link className="w-5 h-5" /> Share
+      </h2>
+      <div className="mb-4">
+        <label className="flex items-center gap-3 cursor-pointer group">
+          <div className="relative">
+            <input
+              type="checkbox"
+              checked={isPublic}
+              onChange={(e) => onPublicChange(e.target.checked)}
+              className="peer sr-only"
+            />
+            <div className="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-primary-600 transition-all duration-200"></div>
+            <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-all duration-200 peer-checked:translate-x-5 shadow-md"></div>
+          </div>
+          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+            <Globe className="w-4 h-4" /> Public
+          </span>
+        </label>
+      </div>
       {isPublic && shareUrl !== undefined ? (
         <div>
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Public share link:</p>
@@ -464,17 +400,25 @@ export function ShareSection({ shareUrl, isPublic, lastSaved }: ShareSectionProp
             />
             <button
               onClick={handleCopy}
-              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-semibold"
+              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-semibold flex items-center gap-2"
             >
-              {copied ? '✓ Copied!' : '📋 Copy'}
+              {copied ? (
+                <>
+                  <Check className="w-4 h-4" /> Copied!
+                </>
+              ) : (
+                <>
+                  <Clipboard className="w-4 h-4" /> Copy
+                </>
+              )}
             </button>
           </div>
         </div>
-      ) : (
+      ) : isPublic ? (
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Enable &quot;Public&quot; in metadata to generate a share link
+          Save the prompt to generate a share link
         </p>
-      )}
+      ) : null}
       {lastSaved !== null && (
         <p className="text-xs text-gray-500 dark:text-gray-500 mt-3">
           Last autosaved: {lastSaved.toLocaleTimeString()}
@@ -538,7 +482,9 @@ export function VersionHistory({
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 p-6">
-      <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">📜 Version History</h2>
+      <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+        <Scroll className="w-5 h-5" /> Version History
+      </h2>
       {renderContent()}
     </div>
   );
@@ -567,12 +513,14 @@ export function MarkdownPreviewModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-800 rounded-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
         <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">📄 Markdown Preview</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <FileText className="w-6 h-6" /> Markdown Preview
+          </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-2xl"
+            className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
           >
-            ✕
+            <X className="w-6 h-6" />
           </button>
         </div>
 
@@ -585,15 +533,96 @@ export function MarkdownPreviewModal({
         <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex gap-4">
           <button
             onClick={handleCopy}
-            className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+            className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold flex items-center justify-center gap-2"
           >
-            {copied ? '✓ Copied!' : '📋 Copy to Clipboard'}
+            {copied ? (
+              <>
+                <Check className="w-4 h-4" /> Copied!
+              </>
+            ) : (
+              <>
+                <Clipboard className="w-4 h-4" /> Copy to Clipboard
+              </>
+            )}
           </button>
           <button
             onClick={onDownload}
-            className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+            className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold flex items-center justify-center gap-2"
           >
-            📥 Download Markdown
+            <Download className="w-4 h-4" /> Download Markdown
+          </button>
+          <button
+            onClick={onClose}
+            className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-semibold"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface JsonPreviewModalProps {
+  json: string;
+  onClose: () => void;
+  onDownload: () => void;
+}
+
+export function JsonPreviewModal({
+  json,
+  onClose,
+  onDownload,
+}: JsonPreviewModalProps): JSX.Element {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (): void => {
+    void navigator.clipboard.writeText(json);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+        <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <Package className="w-6 h-6" /> JSON Preview
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6">
+          <pre className="whitespace-pre-wrap font-mono text-sm bg-gray-50 dark:bg-gray-900 p-4 rounded-lg text-gray-900 dark:text-white">
+            {json}
+          </pre>
+        </div>
+
+        <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex gap-4">
+          <button
+            onClick={handleCopy}
+            className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold flex items-center justify-center gap-2"
+          >
+            {copied ? (
+              <>
+                <Check className="w-4 h-4" /> Copied!
+              </>
+            ) : (
+              <>
+                <Clipboard className="w-4 h-4" /> Copy to Clipboard
+              </>
+            )}
+          </button>
+          <button
+            onClick={onDownload}
+            className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold flex items-center justify-center gap-2"
+          >
+            <Download className="w-4 h-4" /> Download JSON
           </button>
           <button
             onClick={onClose}
