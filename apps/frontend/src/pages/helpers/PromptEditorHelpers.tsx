@@ -19,6 +19,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import TemplateCarousel from '../../components/PromptBuilder/TemplateCarousel';
+import CollapsibleSection from '../../components/PromptBuilder/CollapsibleSection';
 import type { TemplateDomain } from '../../data/veoTemplates';
 import type { PromptVersion } from '../../types/prompt';
 import type { ValidationResult } from '../../utils/veoValidation';
@@ -216,10 +217,19 @@ export function MetadataForm({ tags, onTagsChange }: MetadataFormProps): JSX.Ele
     }
   };
 
+  const getCompletionStatus = (): 'empty' | 'partial' | 'complete' => {
+    if (tags.length === 0) return 'empty';
+    return 'complete';
+  };
+
   return (
-    <div className="mb-6 bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 p-6">
-      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Metadata</h3>
-      <div className="space-y-4">
+    <div className="mb-6">
+      <CollapsibleSection
+        title="Metadata"
+        icon={<Package className="w-5 h-5" />}
+        defaultOpen={true}
+        completionStatus={getCompletionStatus()}
+      >
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Tags
@@ -257,7 +267,7 @@ export function MetadataForm({ tags, onTagsChange }: MetadataFormProps): JSX.Ele
             ))}
           </div>
         </div>
-      </div>
+      </CollapsibleSection>
     </div>
   );
 }
