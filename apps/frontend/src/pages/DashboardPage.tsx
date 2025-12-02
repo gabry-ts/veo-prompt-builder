@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import MarkdownPreview from '../components/MarkdownPreview';
 import StarRating from '../components/StarRating';
-import ValidationPanel from '../components/ValidationPanel';
 import type { VeoPromptStructure } from '../data/veoTemplates';
 import { usePromptFilters } from '../hooks/usePromptFilters';
 import { promptService } from '../services/promptService';
@@ -109,6 +108,7 @@ interface PromptCardProps {
   isDeleting: boolean;
 }
 
+/* eslint-disable max-lines-per-function */
 function PromptCard({
   prompt,
   onDelete,
@@ -119,6 +119,7 @@ function PromptCard({
   isDeleting,
 }: PromptCardProps): JSX.Element {
   const [copied, setCopied] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const promptData = prompt.jsonData as unknown as VeoPromptStructure;
   const validation = useMemo(() => validateVeoPrompt(promptData), [promptData]);
   const hasErrors = validation.warnings.some((w) => w.severity === 'error');
@@ -131,112 +132,188 @@ function PromptCard({
     });
   };
 
+  // Gradient based on prompt status
+  const getGradient = (): string => {
+    if (hasErrors) return 'from-red-500/20 via-orange-500/10 to-transparent';
+    if (hasWarnings) return 'from-yellow-500/20 via-amber-500/10 to-transparent';
+    if (prompt.isFavorite) return 'from-pink-500/20 via-purple-500/10 to-transparent';
+    return 'from-blue-500/20 via-cyan-500/10 to-transparent';
+  };
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border-2 border-gray-200 dark:border-gray-700 hover:shadow-xl hover:border-primary-400 dark:hover:border-primary-600 transition-all overflow-hidden">
-      <div className="p-6 pb-4">
-        <div className="flex items-start justify-between mb-3">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white flex-1 line-clamp-2">
-            {prompt.name}
-          </h3>
-          <div className="flex items-center gap-2 ml-2">
-            <button
-              onClick={() => onToggleFavorite(prompt.id, !prompt.isFavorite)}
-              className="transition-transform hover:scale-125"
-              title={prompt.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-            >
-              <Heart
-                className={`w-5 h-5 ${prompt.isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`}
-              />
-            </button>
-            {hasErrors && <div className="w-3 h-3 bg-red-500 rounded-full" title="Has errors" />}
-            {!hasErrors && hasWarnings && (
-              <div className="w-3 h-3 bg-yellow-500 rounded-full" title="Has warnings" />
-            )}
-            {!hasErrors && !hasWarnings && (
-              <div className="w-3 h-3 bg-green-500 rounded-full" title="Valid" />
-            )}
-          </div>
-        </div>
+    <div
+      className="group relative"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Glassmorphism Card */}
+      <div className="relative bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-gray-700/50 shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden">
+        {/* Gradient Background */}
+        <div
+          className={`absolute inset-0 bg-gradient-to-br ${getGradient()} opacity-50 transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-50'}`}
+        />
 
-        {prompt.description && (
-          <div className="mb-3 line-clamp-2">
-            <MarkdownPreview
-              content={prompt.description}
-              className="text-gray-600 dark:text-gray-400 text-sm"
-            />
-          </div>
-        )}
+        {/* Animated Border Glow */}
+        <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-primary-500/50 via-purple-500/50 to-pink-500/50 blur-xl -z-10" />
 
-        <div className="mb-3">
-          <StarRating rating={prompt.rating} onRate={(rating) => onRate(prompt.id, rating)} />
-        </div>
+        {/* Content */}
+        <div className="relative p-6">
+          {/* Header */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white line-clamp-2 mb-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                {prompt.name}
+              </h3>
+              {prompt.description && (
+                <div className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                  <MarkdownPreview content={prompt.description} />
+                </div>
+              )}
+            </div>
 
-        {prompt.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-3">
-            {prompt.tags.map((tag) => (
-              <span
-                key={tag}
-                className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-1 rounded"
+            {/* Status & Favorite */}
+            <div className="flex items-center gap-2 ml-3">
+              <button
+                onClick={() => onToggleFavorite(prompt.id, !prompt.isFavorite)}
+                className={`p-2 rounded-full transition-all duration-300 ${
+                  prompt.isFavorite
+                    ? 'bg-red-500/20 hover:bg-red-500/30'
+                    : 'bg-gray-100/50 dark:bg-gray-700/50 hover:bg-gray-200/50 dark:hover:bg-gray-600/50'
+                }`}
               >
-                {tag}
-              </span>
-            ))}
+                <Heart
+                  className={`w-5 h-5 transition-all duration-300 ${
+                    prompt.isFavorite
+                      ? 'fill-red-500 text-red-500 scale-110'
+                      : 'text-gray-400 group-hover:scale-110'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
-        )}
 
-        <div className="flex flex-wrap gap-2 mb-3">
-          <span className="text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 px-2 py-1 rounded">
-            {promptData.video_length}s
-          </span>
-          <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded">
-            {promptData.aspect_ratio}
-          </span>
-          <span className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-2 py-1 rounded">
-            {promptData.prompt.sequence?.length || 0} shots
-          </span>
-        </div>
-
-        <ValidationPanel result={validation} compact={true} />
-      </div>
-
-      <div className="bg-gray-50 dark:bg-gray-900 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-500 mb-3">
-          <span>Updated {new Date(prompt.updatedAt).toLocaleDateString()}</span>
-          {prompt.isPublic && (
-            <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded flex items-center gap-1">
-              <LinkIcon className="w-3 h-3" /> Public
-            </span>
+          {/* Tags */}
+          {prompt.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {prompt.tags.slice(0, 3).map((tag) => (
+                <span
+                  key={tag}
+                  className="px-3 py-1 text-xs font-medium bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-700 dark:text-emerald-300 rounded-full backdrop-blur-sm border border-emerald-500/30"
+                >
+                  {tag}
+                </span>
+              ))}
+              {prompt.tags.length > 3 && (
+                <span className="px-3 py-1 text-xs font-medium bg-gray-500/20 text-gray-700 dark:text-gray-300 rounded-full backdrop-blur-sm">
+                  +{prompt.tags.length - 3}
+                </span>
+              )}
+            </div>
           )}
-        </div>
-        <div className="flex flex-col gap-2">
-          <Link
-            to={`/prompts/${prompt.id}`}
-            className="px-3 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-center font-semibold flex items-center justify-center gap-2"
-          >
-            <Edit className="w-4 h-4" /> Edit
-          </Link>
-          <div className="flex gap-2">
-            <button
-              onClick={handleCopyJSON}
-              className="flex-1 px-3 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold flex items-center justify-center"
-              title="Copy JSON"
+
+          {/* Metadata Pills */}
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-full border border-blue-500/20">
+              <Film className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">
+                {promptData.video_length}s
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full border border-purple-500/20">
+              <span className="text-xs font-semibold text-purple-700 dark:text-purple-300">
+                {promptData.aspect_ratio}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-500/10 to-violet-500/10 rounded-full border border-indigo-500/20">
+              <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
+                {promptData.prompt.sequence?.length || 0} shots
+              </span>
+            </div>
+            {prompt.isPublic && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-full border border-green-500/20">
+                <LinkIcon className="w-3 h-3 text-green-600 dark:text-green-400" />
+                <span className="text-xs font-semibold text-green-700 dark:text-green-300">
+                  Public
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Rating & Validation */}
+          <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-200/50 dark:border-gray-700/50">
+            <StarRating rating={prompt.rating} onRate={(rating) => onRate(prompt.id, rating)} />
+            <div className="flex items-center gap-2">
+              {hasErrors && (
+                <div className="flex items-center gap-1.5 px-2 py-1 bg-red-500/10 rounded-full">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                  <span className="text-xs font-medium text-red-700 dark:text-red-400">Errors</span>
+                </div>
+              )}
+              {!hasErrors && hasWarnings && (
+                <div className="flex items-center gap-1.5 px-2 py-1 bg-yellow-500/10 rounded-full">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
+                  <span className="text-xs font-medium text-yellow-700 dark:text-yellow-400">
+                    Warnings
+                  </span>
+                </div>
+              )}
+              {!hasErrors && !hasWarnings && (
+                <div className="flex items-center gap-1.5 px-2 py-1 bg-green-500/10 rounded-full">
+                  <CheckCircle className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
+                  <span className="text-xs font-medium text-green-700 dark:text-green-400">
+                    Valid
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="space-y-2">
+            <Link
+              to={`/prompts/${prompt.id}`}
+              className="block w-full px-4 py-2.5 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white rounded-xl font-semibold text-center transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
-              {copied ? <Check className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
-            </button>
-            <button
-              onClick={() => onDuplicate(prompt)}
-              className="flex-1 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold flex items-center justify-center"
-              disabled={isDuplicating}
-            >
-              <Copy className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => onDelete(prompt.id)}
-              className="flex-1 px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold flex items-center justify-center"
-              disabled={isDeleting}
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+              <span className="flex items-center justify-center gap-2">
+                <Edit className="w-4 h-4" />
+                Edit Prompt
+              </span>
+            </Link>
+
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                onClick={handleCopyJSON}
+                className="px-3 py-2 bg-white/50 dark:bg-gray-700/50 hover:bg-white/70 dark:hover:bg-gray-700/70 backdrop-blur-sm rounded-xl transition-all duration-300 text-gray-700 dark:text-gray-300 font-medium"
+                title="Copy JSON"
+              >
+                {copied ? (
+                  <Check className="w-4 h-4 mx-auto text-green-600" />
+                ) : (
+                  <FileText className="w-4 h-4 mx-auto" />
+                )}
+              </button>
+              <button
+                onClick={() => onDuplicate(prompt)}
+                className="px-3 py-2 bg-white/50 dark:bg-gray-700/50 hover:bg-white/70 dark:hover:bg-gray-700/70 backdrop-blur-sm rounded-xl transition-all duration-300 text-gray-700 dark:text-gray-300 font-medium disabled:opacity-50"
+                disabled={isDuplicating}
+              >
+                <Copy className="w-4 h-4 mx-auto" />
+              </button>
+              <button
+                onClick={() => onDelete(prompt.id)}
+                className="px-3 py-2 bg-white/50 dark:bg-gray-700/50 hover:bg-red-500/20 dark:hover:bg-red-500/20 backdrop-blur-sm rounded-xl transition-all duration-300 text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 font-medium disabled:opacity-50"
+                disabled={isDeleting}
+              >
+                <Trash2 className="w-4 h-4 mx-auto" />
+              </button>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-4 pt-3 border-t border-gray-200/50 dark:border-gray-700/50">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Updated {new Date(prompt.updatedAt).toLocaleDateString()}
+            </p>
           </div>
         </div>
       </div>
