@@ -1,5 +1,5 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { Moon, Sun, User } from 'lucide-react';
+import { Moon, Sun, User, Activity } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
 
@@ -35,6 +35,12 @@ function Layout(): JSX.Element {
               >
                 {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
               </button>
+              <Link
+                to="/activity"
+                className="text-sm text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 flex items-center gap-1"
+              >
+                <Activity className="w-4 h-4" /> Activity
+              </Link>
               {user?.role === 'ADMIN' && (
                 <Link
                   to="/admin"

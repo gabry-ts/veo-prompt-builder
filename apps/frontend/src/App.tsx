@@ -7,6 +7,7 @@ import ProfilePage from './pages/ProfilePage';
 import PromptEditorPage from './pages/PromptEditorPage';
 import AdminPage from './pages/AdminPage';
 import SharedPromptPage from './pages/SharedPromptPage';
+import { ActivityPage } from './pages/ActivityPage';
 import { useAuthStore } from './store/authStore';
 
 function PrivateRoute({ children }: { children: React.ReactNode }): JSX.Element {
@@ -100,6 +101,7 @@ function App(): JSX.Element {
           <Route path="prompts/new" element={<PromptEditorPage />} />
           <Route path="prompts/:id" element={<PromptEditorPage />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="activity" element={<ActivityPage />} />
           <Route
             path="admin"
             element={
