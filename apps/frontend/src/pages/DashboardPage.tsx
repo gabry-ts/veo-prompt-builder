@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { Search, Heart, Edit, FileText, Copy, Trash2, Check, Link as LinkIcon } from 'lucide-react';
 import MarkdownPreview from '../components/MarkdownPreview';
 import StarRating from '../components/StarRating';
 import ValidationPanel from '../components/ValidationPanel';
@@ -36,13 +37,14 @@ function PromptFilters({
   return (
     <div className="mb-6 flex flex-col gap-4">
       <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1">
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="🔍 Search prompts by name, description or tags..."
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
+            placeholder="Search prompts by name, description or tags..."
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
           />
         </div>
         <div className="flex gap-2">
@@ -71,13 +73,14 @@ function PromptFilters({
       <div className="flex items-center gap-2">
         <button
           onClick={onToggleFavorites}
-          className={`px-4 py-2 rounded-lg transition-colors ${
+          className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
             showFavoritesOnly
               ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-2 border-red-500'
               : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400 border-2 border-transparent'
           }`}
         >
-          {showFavoritesOnly ? '❤️ Favorites Only' : '🤍 Show All'}
+          <Heart className={`w-4 h-4 ${showFavoritesOnly ? 'fill-current' : ''}`} />
+          {showFavoritesOnly ? 'Favorites Only' : 'Show All'}
         </button>
       </div>
     </div>
@@ -126,10 +129,12 @@ function PromptCard({
           <div className="flex items-center gap-2 ml-2">
             <button
               onClick={() => onToggleFavorite(prompt.id, !prompt.isFavorite)}
-              className="text-xl transition-transform hover:scale-125"
+              className="transition-transform hover:scale-125"
               title={prompt.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             >
-              {prompt.isFavorite ? '❤️' : '🤍'}
+              <Heart
+                className={`w-5 h-5 ${prompt.isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`}
+              />
             </button>
             {hasErrors && <div className="w-3 h-3 bg-red-500 rounded-full" title="Has errors" />}
             {!hasErrors && hasWarnings && (
@@ -186,39 +191,39 @@ function PromptCard({
         <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-500 mb-3">
           <span>Updated {new Date(prompt.updatedAt).toLocaleDateString()}</span>
           {prompt.isPublic && (
-            <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded">
-              🔗 Public
+            <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded flex items-center gap-1">
+              <LinkIcon className="w-3 h-3" /> Public
             </span>
           )}
         </div>
         <div className="flex flex-col gap-2">
           <Link
             to={`/prompts/${prompt.id}`}
-            className="px-3 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-center font-semibold"
+            className="px-3 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-center font-semibold flex items-center justify-center gap-2"
           >
-            ✏️ Edit
+            <Edit className="w-4 h-4" /> Edit
           </Link>
           <div className="flex gap-2">
             <button
               onClick={handleCopyJSON}
-              className="flex-1 px-3 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold"
+              className="flex-1 px-3 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold flex items-center justify-center"
               title="Copy JSON"
             >
-              {copied ? '✓' : '📄'}
+              {copied ? <Check className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
             </button>
             <button
               onClick={() => onDuplicate(prompt)}
-              className="flex-1 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+              className="flex-1 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold flex items-center justify-center"
               disabled={isDuplicating}
             >
-              📋
+              <Copy className="w-4 h-4" />
             </button>
             <button
               onClick={() => onDelete(prompt.id)}
-              className="flex-1 px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
+              className="flex-1 px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold flex items-center justify-center"
               disabled={isDeleting}
             >
-              🗑️
+              <Trash2 className="w-4 h-4" />
             </button>
           </div>
         </div>

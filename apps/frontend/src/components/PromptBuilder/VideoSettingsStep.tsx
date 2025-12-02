@@ -1,3 +1,4 @@
+import { Clapperboard } from 'lucide-react';
 import type { VeoPromptStructure } from '../../data/veoTemplates';
 import CollapsibleSection from './CollapsibleSection';
 
@@ -20,7 +21,7 @@ function VideoSettingsStep({ data, onChange }: VideoSettingsStepProps): JSX.Elem
   return (
     <CollapsibleSection
       title="Video Settings"
-      icon="🎬"
+      icon={<Clapperboard className="w-5 h-5" />}
       defaultOpen={true}
       completionStatus={completionStatus}
       required={true}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Film, Clapperboard, FileText } from 'lucide-react';
 import type { VeoPromptStructure } from '../../data/veoTemplates';
 import CollapsibleSection from './CollapsibleSection';
 import {
@@ -36,7 +37,7 @@ function SequenceStep({ data, onChange }: SequenceStepProps): JSX.Element {
   return (
     <CollapsibleSection
       title="Sequence & Timeline"
-      icon="🎞️"
+      icon={<Film className="w-5 h-5" />}
       defaultOpen={true}
       completionStatus={getCompletionStatus(data.prompt.sequence)}
       required={true}
@@ -46,23 +47,23 @@ function SequenceStep({ data, onChange }: SequenceStepProps): JSX.Element {
         <div className="flex gap-2">
           <button
             onClick={() => setViewMode('timeline')}
-            className={`px-4 py-2 rounded-lg transition-all ${
+            className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
               viewMode === 'timeline'
                 ? 'bg-primary-600 text-white shadow-lg'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
             }`}
           >
-            🎬 Timeline View
+            <Clapperboard className="w-4 h-4" /> Timeline View
           </button>
           <button
             onClick={() => setViewMode('form')}
-            className={`px-4 py-2 rounded-lg transition-all ${
+            className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
               viewMode === 'form'
                 ? 'bg-primary-600 text-white shadow-lg'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
             }`}
           >
-            📝 Form View
+            <FileText className="w-4 h-4" /> Form View
           </button>
           <button
             onClick={() => {
