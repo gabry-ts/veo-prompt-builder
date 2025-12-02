@@ -111,6 +111,7 @@ interface PromptCardProps {
   isDeleting: boolean;
   isSelected: boolean;
   onToggleSelect: (id: string) => void;
+  selectionModeActive: boolean;
 }
 
 /* eslint-disable max-lines-per-function */
@@ -124,6 +125,7 @@ function PromptCard({
   isDeleting,
   isSelected,
   onToggleSelect,
+  selectionModeActive,
 }: PromptCardProps): JSX.Element {
   const [copied, setCopied] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -153,15 +155,28 @@ function PromptCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Selection Checkbox */}
-      <div className="absolute top-4 left-4 z-20">
-        <input
-          type="checkbox"
-          checked={isSelected}
-          onChange={() => onToggleSelect(prompt.id)}
-          className="w-5 h-5 rounded border-2 border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-2 focus:ring-primary-500 cursor-pointer"
-          onClick={(e) => e.stopPropagation()}
-        />
+      {/* Selection Checkbox - Top Right on Hover or when selection mode active */}
+      <div
+        className={`absolute top-4 right-4 z-30 transition-all duration-300 ${
+          isHovered || isSelected || selectionModeActive
+            ? 'opacity-100 translate-y-0'
+            : 'opacity-0 -translate-y-2 pointer-events-none'
+        }`}
+      >
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleSelect(prompt.id);
+          }}
+          className={`w-10 h-10 rounded-full border-2 transition-all duration-200 flex items-center justify-center shadow-lg backdrop-blur-sm ${
+            isSelected
+              ? 'bg-primary-600 border-primary-600 scale-110'
+              : 'bg-white/90 dark:bg-gray-800/90 border-gray-300 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500 hover:scale-105'
+          }`}
+        >
+          {isSelected && <Check className="w-5 h-5 text-white" strokeWidth={3} />}
+        </button>
       </div>
 
       {/* Glassmorphism Card */}
@@ -597,6 +612,7 @@ function DashboardPage(): JSX.Element {
                 isDeleting={deleteMutation.isPending}
                 isSelected={selectedPromptIds.has(prompt.id)}
                 onToggleSelect={handleToggleSelect}
+                selectionModeActive={selectedPromptIds.size > 0}
               />
             ))}
           </div>
