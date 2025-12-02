@@ -16,7 +16,7 @@ export class PromptsService {
       data: {
         name: createPromptDto.name,
         description: createPromptDto.description,
-        jsonData: createPromptDto.jsonData as Prisma.InputJsonValue,
+        jsonData: createPromptDto.jsonData as unknown as Prisma.InputJsonValue,
         userId,
         tags: createPromptDto.tags || [],
         isFavorite: createPromptDto.isFavorite || false,
@@ -227,5 +227,20 @@ export class PromptsService {
     markdown += `**Favorite**: ${prompt.isFavorite ? '⭐' : '❌'}\n`;
 
     return markdown;
+  }
+
+  async findByShareToken(shareToken: string): Promise<Prompt> {
+    const prompt = await this.prisma.prompt.findFirst({
+      where: {
+        shareToken,
+        isPublic: true,
+      },
+    });
+
+    if (!prompt) {
+      throw new NotFoundException('Prompt not found or not public');
+    }
+
+    return prompt;
   }
 }

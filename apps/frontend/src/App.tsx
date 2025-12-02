@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
 import PromptEditorPage from './pages/PromptEditorPage';
 import AdminPage from './pages/AdminPage';
+import SharedPromptPage from './pages/SharedPromptPage';
 import { useAuthStore } from './store/authStore';
 
 function PrivateRoute({ children }: { children: React.ReactNode }): JSX.Element {
@@ -85,6 +86,7 @@ function App(): JSX.Element {
             </PublicRoute>
           }
         />
+        <Route path="/shared/:token" element={<SharedPromptPage />} />
         <Route
           path="/"
           element={

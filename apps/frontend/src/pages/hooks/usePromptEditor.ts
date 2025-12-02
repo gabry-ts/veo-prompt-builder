@@ -43,7 +43,7 @@ interface UsePromptEditorReturn {
   rating: number | undefined;
   setRating: (rating: number | undefined) => void;
   isPublic: boolean;
-  setIsPublic: (isPublic: boolean) => void;
+  handlePublicChange: (isPublic: boolean) => void;
   editorMode: EditorMode;
   setEditorMode: (mode: EditorMode) => void;
   showTemplateSelector: boolean;
@@ -56,6 +56,7 @@ interface UsePromptEditorReturn {
   handleTemplateSelect: (template: TemplateDomain) => void;
   handleImportJson: () => void;
   handleSave: () => void;
+  handleSilentSave: () => void;
   handleExport: () => void;
   isSaving: boolean;
   shareToken: string | null | undefined;
@@ -148,6 +149,20 @@ const useUpdatePromptMutation = (
       void queryClient.invalidateQueries({ queryKey: ['prompts'] });
       void queryClient.invalidateQueries({ queryKey: ['prompt', id] });
       onNavigate('/dashboard');
+    },
+  });
+};
+
+const useSilentUpdatePromptMutation = (
+  id: string,
+  queryClient: ReturnType<typeof useQueryClient>,
+): UseMutationResult<Prompt, unknown, PromptMutationData, unknown> => {
+  return useMutation({
+    mutationFn: (data: PromptMutationData) => promptService.update(id, data),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['prompts'] });
+      await queryClient.invalidateQueries({ queryKey: ['prompt', id] });
+      await queryClient.refetchQueries({ queryKey: ['prompt', id] });
     },
   });
 };
@@ -273,6 +288,7 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
 
   const createMutation = useCreatePromptMutation(queryClient, onNavigate);
   const updateMutation = useUpdatePromptMutation(id!, queryClient, onNavigate);
+  const silentUpdateMutation = useSilentUpdatePromptMutation(id!, queryClient);
   const restoreMutation = useRestoreVersionMutation(id!, queryClient, setPromptData, setJsonData);
 
   useAutosave({
@@ -310,6 +326,27 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
       );
     } catch {
       alert('Invalid JSON format');
+    }
+  };
+
+  const handleSilentSave = (): void => {
+    if (!isEditMode) return;
+    try {
+      silentUpdateMutation.mutate(
+        createSaveData(
+          name,
+          description,
+          tags,
+          isFavorite,
+          rating,
+          isPublic,
+          editorMode,
+          promptData,
+          jsonData,
+        ),
+      );
+    } catch {
+      // Silent fail
     }
   };
 
@@ -366,6 +403,30 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
     setMarkdownPreview(null);
   };
 
+  const handlePublicChange = (newIsPublic: boolean): void => {
+    setIsPublic(newIsPublic);
+    if (isEditMode) {
+      // Silent save to backend with new public state
+      try {
+        silentUpdateMutation.mutate(
+          createSaveData(
+            name,
+            description,
+            tags,
+            isFavorite,
+            rating,
+            newIsPublic, // Use the new value directly
+            editorMode,
+            promptData,
+            jsonData,
+          ),
+        );
+      } catch {
+        // Silent fail
+      }
+    }
+  };
+
   const validationResult = useMemo(() => {
     try {
       const json = getJsonFromEditor(editorMode, promptData, jsonData);
@@ -394,7 +455,7 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
     rating,
     setRating,
     isPublic,
-    setIsPublic,
+    handlePublicChange,
     editorMode,
     setEditorMode,
     showTemplateSelector,
@@ -410,6 +471,7 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
     },
     handleImportJson: () => importJsonFile(setPromptData),
     handleSave,
+    handleSilentSave,
     handleExport,
     isSaving: createMutation.isPending || updateMutation.isPending,
     shareToken: prompt?.shareToken,

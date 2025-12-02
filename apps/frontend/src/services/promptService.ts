@@ -45,4 +45,9 @@ export const promptService = {
     const response = await api.get<{ markdown: string }>(`/prompts/${id}/export/markdown`);
     return response.data.markdown;
   },
+
+  getByShareToken: async (token: string): Promise<Prompt> => {
+    const response = await api.get<Prompt>(`/prompts/shared/${token}`);
+    return response.data;
+  },
 };

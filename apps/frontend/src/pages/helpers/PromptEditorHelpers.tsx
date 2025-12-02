@@ -455,14 +455,18 @@ export function ShareSection({
         <Link className="w-5 h-5" /> Share
       </h2>
       <div className="mb-4">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={isPublic}
-            onChange={(e) => onPublicChange(e.target.checked)}
-            className="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-          />
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1">
+        <label className="flex items-center gap-3 cursor-pointer group">
+          <div className="relative">
+            <input
+              type="checkbox"
+              checked={isPublic}
+              onChange={(e) => onPublicChange(e.target.checked)}
+              className="peer sr-only"
+            />
+            <div className="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-primary-600 transition-all duration-200"></div>
+            <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-all duration-200 peer-checked:translate-x-5 shadow-md"></div>
+          </div>
+          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
             <Globe className="w-4 h-4" /> Public
           </span>
         </label>

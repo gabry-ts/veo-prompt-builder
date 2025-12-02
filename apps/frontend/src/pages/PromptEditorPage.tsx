@@ -29,7 +29,7 @@ function PromptEditorPage(): JSX.Element {
     rating,
     setRating,
     isPublic,
-    setIsPublic,
+    handlePublicChange,
     editorMode,
     setEditorMode,
     showTemplateSelector,
@@ -100,7 +100,7 @@ function PromptEditorPage(): JSX.Element {
         isEditMode={isEditMode}
         shareUrl={shareUrl}
         isPublic={isPublic}
-        onPublicChange={setIsPublic}
+        onPublicChange={handlePublicChange}
         rating={rating}
         onRatingChange={setRating}
         isFavorite={isFavorite}
