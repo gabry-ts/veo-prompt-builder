@@ -191,6 +191,31 @@ export class PromptsService {
     });
   }
 
+  async deleteBulk(ids: string[], userId: string): Promise<{ deleted: number }> {
+    // Verify all prompts belong to the user
+    const prompts = await this.prisma.prompt.findMany({
+      where: {
+        id: { in: ids },
+        userId,
+      },
+      select: { id: true },
+    });
+
+    const foundIds = prompts.map((p) => p.id);
+    if (foundIds.length !== ids.length) {
+      throw new ForbiddenException('Some prompts do not belong to you or do not exist');
+    }
+
+    const result = await this.prisma.prompt.deleteMany({
+      where: {
+        id: { in: foundIds },
+        userId,
+      },
+    });
+
+    return { deleted: result.count };
+  }
+
   private extractPromptData(rawData: Record<string, unknown>): Record<string, unknown> {
     return rawData.prompt !== null &&
       rawData.prompt !== undefined &&

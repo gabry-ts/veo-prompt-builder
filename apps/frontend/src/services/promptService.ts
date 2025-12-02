@@ -47,6 +47,11 @@ export const promptService = {
     await api.delete(`/prompts/${id}`);
   },
 
+  deleteBulk: async (ids: string[]): Promise<{ deleted: number }> => {
+    const response = await api.delete<{ deleted: number }>('/prompts/bulk', { data: { ids } });
+    return response.data;
+  },
+
   getVersions: async (id: string): Promise<PromptVersion[]> => {
     const response = await api.get<PromptVersion[]>(`/prompts/${id}/versions`);
     return response.data;

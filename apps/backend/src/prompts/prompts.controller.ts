@@ -16,6 +16,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreatePromptDto } from './dto/create-prompt.dto';
 import { UpdatePromptDto } from './dto/update-prompt.dto';
 import { QueryPromptsDto } from './dto/query-prompts.dto';
+import { BulkDeleteDto } from './dto/bulk-delete.dto';
 import { PromptsService } from './prompts.service';
 import { PromptResponseDto } from '../common/dto/prompt-response.dto';
 
@@ -95,6 +96,17 @@ export class PromptsController {
   ): Promise<PromptResponseDto> {
     const prompt = await this.promptsService.update(id, req.user.id, updatePromptDto);
     return PromptResponseDto.fromPrisma(prompt);
+  }
+
+  @Delete('bulk')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete multiple prompts' })
+  async deleteBulk(
+    @Body() dto: BulkDeleteDto,
+    @Request() req: RequestWithUser,
+  ): Promise<{ deleted: number }> {
+    return this.promptsService.deleteBulk(dto.ids, req.user.id);
   }
 
   @Delete(':id')

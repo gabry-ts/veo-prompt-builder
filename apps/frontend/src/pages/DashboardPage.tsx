@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import MarkdownPreview from '../components/MarkdownPreview';
 import StarRating from '../components/StarRating';
+import BulkActionBar from '../components/BulkActionBar';
 import type { VeoPromptStructure } from '../data/veoTemplates';
 import { usePromptFilters } from '../hooks/usePromptFilters';
 import { useInfinitePrompts } from '../hooks/useInfinitePrompts';
@@ -108,6 +109,8 @@ interface PromptCardProps {
   onRate: (id: string, rating: number) => void;
   isDuplicating: boolean;
   isDeleting: boolean;
+  isSelected: boolean;
+  onToggleSelect: (id: string) => void;
 }
 
 /* eslint-disable max-lines-per-function */
@@ -119,6 +122,8 @@ function PromptCard({
   onRate,
   isDuplicating,
   isDeleting,
+  isSelected,
+  onToggleSelect,
 }: PromptCardProps): JSX.Element {
   const [copied, setCopied] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -148,8 +153,21 @@ function PromptCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      {/* Selection Checkbox */}
+      <div className="absolute top-4 left-4 z-20">
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={() => onToggleSelect(prompt.id)}
+          className="w-5 h-5 rounded border-2 border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-2 focus:ring-primary-500 cursor-pointer"
+          onClick={(e) => e.stopPropagation()}
+        />
+      </div>
+
       {/* Glassmorphism Card */}
-      <div className="relative bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-gray-700/50 shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden">
+      <div
+        className={`relative bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-2xl border ${isSelected ? 'border-primary-500 border-4' : 'border-white/20 dark:border-gray-700/50'} shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden`}
+      >
         {/* Gradient Background */}
         <div
           className={`absolute inset-0 bg-gradient-to-br ${getGradient()} opacity-50 transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-50'}`}
@@ -354,6 +372,16 @@ function DashboardPage(): JSX.Element {
     filteredAndSortedPrompts,
   } = usePromptFilters(prompts);
 
+  const [selectedPromptIds, setSelectedPromptIds] = useState<Set<string>>(new Set());
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: (ids: string[]) => promptService.deleteBulk(ids),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['prompts'] });
+      setSelectedPromptIds(new Set());
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: (id: string) => promptService.delete(id),
     onSuccess: () => {
@@ -401,6 +429,26 @@ function DashboardPage(): JSX.Element {
 
   const handleRate = (id: string, rating: number): void => {
     updateMutation.mutate({ id, data: { rating } });
+  };
+
+  const handleToggleSelect = (id: string): void => {
+    setSelectedPromptIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const handleBulkDelete = (): void => {
+    bulkDeleteMutation.mutate(Array.from(selectedPromptIds));
+  };
+
+  const handleCancelSelection = (): void => {
+    setSelectedPromptIds(new Set());
   };
 
   const stats = useMemo(() => {
@@ -547,6 +595,8 @@ function DashboardPage(): JSX.Element {
                 onRate={handleRate}
                 isDuplicating={duplicateMutation.isPending}
                 isDeleting={deleteMutation.isPending}
+                isSelected={selectedPromptIds.has(prompt.id)}
+                onToggleSelect={handleToggleSelect}
               />
             ))}
           </div>
@@ -565,6 +615,15 @@ function DashboardPage(): JSX.Element {
             </div>
           )}
         </>
+      )}
+
+      {/* Bulk Action Bar */}
+      {selectedPromptIds.size > 0 && (
+        <BulkActionBar
+          selectedCount={selectedPromptIds.size}
+          onDelete={handleBulkDelete}
+          onCancel={handleCancelSelection}
+        />
       )}
     </div>
   );
