@@ -1,16 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import type { JsonValue } from '@prisma/client/runtime/library';
+import type { VeoPromptData } from '@meo-veo/shared';
 import {
   IsNotEmpty,
   IsString,
   IsOptional,
-  IsObject,
   IsArray,
   IsBoolean,
   IsInt,
   Min,
   Max,
 } from 'class-validator';
+import { IsVeoPromptData } from '../../common/validators/veo-prompt.validator';
 
 export class CreatePromptDto {
   @ApiProperty({ example: 'My Cooking Video' })
@@ -28,13 +28,14 @@ export class CreatePromptDto {
       scene_1: {
         scene: {
           camera: { type: 'selfie-stick', angle: 'slightly below eye level' },
+          subject: { description: 'Chef cooking pasta' },
         },
       },
     },
   })
-  @IsObject()
   @IsNotEmpty()
-  jsonData!: JsonValue;
+  @IsVeoPromptData({ message: 'Invalid Veo prompt data structure' })
+  jsonData!: VeoPromptData;
 
   @ApiProperty({ example: ['cooking', 'tutorial'], required: false })
   @IsArray()

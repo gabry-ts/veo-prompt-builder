@@ -1,18 +1,33 @@
+import { useState } from 'react';
+import {
+  Palette,
+  FileText,
+  BookOpen,
+  Download,
+  Save,
+  Clock,
+  Package,
+  Eye,
+  EyeOff,
+  Link,
+  Scroll,
+  X,
+  Heart,
+} from 'lucide-react';
+import TagMultiselect from '../../components/TagMultiselect';
 import VisualFormBuilderV2 from '../../components/PromptBuilder/VisualFormBuilderV2';
 import ValidationPanel from '../../components/ValidationPanel';
 import type { VeoPromptStructure, TemplateDomain } from '../../data/veoTemplates';
 import type { PromptVersion } from '../../types/prompt';
 import type { ValidationResult } from '../../utils/veoValidation';
 import {
-  EditorActions,
   JsonEditor,
-  JsonPreview,
-  ValidationCard,
   TemplateSelector,
   WelcomeTemplate,
   ShareSection,
   VersionHistory,
 } from './PromptEditorHelpers';
+import StarRating from '../../components/StarRating';
 
 interface TemplatesSectionProps {
   isEditMode: boolean;
@@ -63,23 +78,23 @@ export function EditorModeToggleSection({
       <div className="flex bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
         <button
           onClick={() => onModeChange('visual')}
-          className={`px-4 py-2 rounded-lg transition-all font-semibold ${
+          className={`px-4 py-2 rounded-lg transition-all font-semibold flex items-center gap-2 ${
             editorMode === 'visual'
               ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-lg'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
           }`}
         >
-          🎨 Visual Builder
+          <Palette className="w-4 h-4" /> Visual Builder
         </button>
         <button
           onClick={() => onModeChange('json')}
-          className={`px-4 py-2 rounded-lg transition-all font-semibold ${
+          className={`px-4 py-2 rounded-lg transition-all font-semibold flex items-center gap-2 ${
             editorMode === 'json'
               ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-lg'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
           }`}
         >
-          📝 JSON Editor
+          <FileText className="w-4 h-4" /> JSON Editor
         </button>
       </div>
 
@@ -87,15 +102,15 @@ export function EditorModeToggleSection({
         <>
           <button
             onClick={onShowTemplates}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold"
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold flex items-center gap-2"
           >
-            📚 Templates
+            <BookOpen className="w-4 h-4" /> Templates
           </button>
           <button
             onClick={onImportJson}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold flex items-center gap-2"
           >
-            📥 Import JSON
+            <Download className="w-4 h-4" /> Import JSON
           </button>
         </>
       )}
@@ -108,7 +123,6 @@ interface MainContentGridProps {
   promptData: VeoPromptStructure;
   jsonData: string;
   validationResult: ValidationResult;
-  getValidationSummary: (result: ValidationResult) => string;
   onPromptChange: (data: VeoPromptStructure) => void;
   onJsonChange: (value: string) => void;
   onSave: () => void;
@@ -119,18 +133,25 @@ interface MainContentGridProps {
   isEditMode: boolean;
   shareUrl: string | undefined;
   isPublic: boolean;
+  onPublicChange: (isPublic: boolean) => void;
+  rating: number | undefined;
+  onRatingChange: (rating: number | undefined) => void;
+  isFavorite: boolean;
+  onFavoriteChange: (favorite: boolean) => void;
   lastSaved: Date | null;
   versions: PromptVersion[];
   isLoadingVersions: boolean;
   onRestoreVersion: (versionId: string) => void;
+  tags: string[];
+  onTagsChange: (tags: string[]) => void;
 }
 
+/* eslint-disable max-lines-per-function */
 export function MainContentGrid({
   editorMode,
   promptData,
   jsonData,
   validationResult,
-  getValidationSummary,
   onPromptChange,
   onJsonChange,
   onSave,
@@ -141,57 +162,201 @@ export function MainContentGrid({
   isEditMode,
   shareUrl,
   isPublic,
+  onPublicChange,
+  rating,
+  onRatingChange,
+  isFavorite,
+  onFavoriteChange,
   lastSaved,
   versions,
   isLoadingVersions,
   onRestoreVersion,
+  tags,
+  onTagsChange,
 }: MainContentGridProps): JSX.Element {
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [showVersionsModal, setShowVersionsModal] = useState(false);
+  const [showJsonPreview, setShowJsonPreview] = useState(false);
+
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-      {/* Left Side - Form or JSON Editor (2 columns) */}
-      <div className="xl:col-span-2 space-y-6">
+    <>
+      {/* Sticky Actions Bar */}
+      <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b-2 border-gray-200 dark:border-gray-700 mb-6 -mx-6 px-6 py-4">
+        <div className="flex flex-wrap gap-3 items-center justify-between">
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={onSave}
+              disabled={!canSave || isSaving}
+              className="px-6 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-bold shadow-md hover:shadow-lg flex items-center gap-2"
+            >
+              {isSaving ? (
+                <>
+                  <Clock className="w-4 h-4" /> Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" /> Save
+                </>
+              )}
+            </button>
+            <button
+              onClick={onExport}
+              className="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all font-semibold shadow-md hover:shadow-lg flex items-center gap-2"
+            >
+              <Package className="w-4 h-4" /> JSON
+            </button>
+            {isEditMode && onMarkdownPreview !== undefined && (
+              <button
+                onClick={onMarkdownPreview}
+                className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-semibold shadow-md hover:shadow-lg flex items-center gap-2"
+              >
+                <FileText className="w-4 h-4" /> Markdown
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-3 items-center">
+            {/* Rating */}
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700">
+              <StarRating rating={rating} onRate={onRatingChange} />
+            </div>
+
+            {/* Favorite */}
+            <button
+              onClick={() => onFavoriteChange(!isFavorite)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 transition-all font-semibold shadow-md ${
+                isFavorite
+                  ? 'bg-red-500 border-red-500 text-white hover:bg-red-600 hover:border-red-600'
+                  : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+              }`}
+            >
+              <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+            </button>
+
+            {/* Tags Multiselect */}
+            <TagMultiselect tags={tags} onTagsChange={onTagsChange} />
+
+            {editorMode === 'visual' && (
+              <button
+                onClick={() => setShowJsonPreview(!showJsonPreview)}
+                className="px-4 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all font-semibold shadow-md flex items-center gap-2"
+              >
+                {showJsonPreview ? (
+                  <>
+                    <EyeOff className="w-4 h-4" /> Hide JSON
+                  </>
+                ) : (
+                  <>
+                    <Eye className="w-4 h-4" /> View JSON
+                  </>
+                )}
+              </button>
+            )}
+            {isEditMode && (
+              <>
+                <button
+                  onClick={() => setShowShareModal(true)}
+                  className="px-4 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all font-semibold shadow-md flex items-center gap-2"
+                >
+                  <Link className="w-4 h-4" /> Share
+                </button>
+                <button
+                  onClick={() => setShowVersionsModal(true)}
+                  className="px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all font-semibold shadow-md flex items-center gap-2"
+                >
+                  <Scroll className="w-4 h-4" /> Versions
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Inline Validation Summary */}
+        <div className="mt-3">
+          <ValidationPanel result={validationResult} compact={true} />
+        </div>
+      </div>
+
+      {/* Full Width Editor */}
+      <div className="space-y-6">
         {editorMode === 'visual' ? (
           <VisualFormBuilderV2 initialData={promptData} onChange={onPromptChange} />
         ) : (
           <JsonEditor value={jsonData} onChange={onJsonChange} />
         )}
+
+        {/* JSON Preview (collapsible) */}
+        {editorMode === 'visual' && showJsonPreview && (
+          <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <FileText className="w-5 h-5" /> JSON Preview
+              </h2>
+              <button
+                onClick={() => setShowJsonPreview(false)}
+                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <pre className="text-xs text-gray-800 dark:text-gray-200 overflow-auto bg-gray-50 dark:bg-gray-900 p-4 rounded-lg whitespace-pre-wrap break-words max-h-96 border border-gray-200 dark:border-gray-700">
+              {JSON.stringify(promptData, null, 2)}
+            </pre>
+          </div>
+        )}
       </div>
 
-      {/* Right Side - Validation & Actions (1 column) */}
-      <div className="space-y-6">
-        {/* Actions Card */}
-        <EditorActions
-          onSave={onSave}
-          onExport={onExport}
-          onMarkdownPreview={onMarkdownPreview}
-          isSaving={isSaving}
-          canSave={canSave}
-          isEditMode={isEditMode}
-        />
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl max-w-lg w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <Link className="w-6 h-6" /> Share
+              </h2>
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <ShareSection
+              shareUrl={shareUrl}
+              isPublic={isPublic}
+              onPublicChange={onPublicChange}
+              lastSaved={lastSaved}
+            />
+          </div>
+        </div>
+      )}
 
-        {/* Share Section (only in edit mode) */}
-        {isEditMode && (
-          <ShareSection shareUrl={shareUrl} isPublic={isPublic} lastSaved={lastSaved} />
-        )}
-
-        <ValidationCard
-          validationResult={validationResult}
-          getValidationSummary={getValidationSummary}
-        >
-          <ValidationPanel result={validationResult} />
-        </ValidationCard>
-
-        {/* Version History (only in edit mode) */}
-        {isEditMode && (
-          <VersionHistory
-            versions={versions}
-            isLoading={isLoadingVersions}
-            onRestore={onRestoreVersion}
-          />
-        )}
-
-        {editorMode === 'visual' && <JsonPreview data={promptData} />}
-      </div>
-    </div>
+      {/* Versions Modal */}
+      {showVersionsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl max-w-2xl w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <Scroll className="w-6 h-6" /> Version History
+              </h2>
+              <button
+                onClick={() => setShowVersionsModal(false)}
+                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <VersionHistory
+              versions={versions}
+              isLoading={isLoadingVersions}
+              onRestore={(versionId) => {
+                onRestoreVersion(versionId);
+                setShowVersionsModal(false);
+              }}
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 }

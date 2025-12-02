@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../common/prisma/prisma.service';
 import type { CreatePromptDto } from './dto/create-prompt.dto';
 import type { UpdatePromptDto } from './dto/update-prompt.dto';
+import type { QueryPromptsDto } from './dto/query-prompts.dto';
 
 @Injectable()
 export class PromptsService {
@@ -16,7 +17,7 @@ export class PromptsService {
       data: {
         name: createPromptDto.name,
         description: createPromptDto.description,
-        jsonData: createPromptDto.jsonData as Prisma.InputJsonValue,
+        jsonData: createPromptDto.jsonData as unknown as Prisma.InputJsonValue,
         userId,
         tags: createPromptDto.tags || [],
         isFavorite: createPromptDto.isFavorite || false,
@@ -38,6 +39,33 @@ export class PromptsService {
       where: { userId },
       orderBy: { updatedAt: 'desc' },
     });
+  }
+
+  async findAllPaginated(
+    userId: string,
+    query: QueryPromptsDto,
+  ): Promise<{ data: Prompt[]; nextCursor: string | null; hasMore: boolean }> {
+    const { limit = 20, cursor } = query;
+
+    const prompts = await this.prisma.prompt.findMany({
+      where: { userId },
+      take: limit + 1, // Take one extra to check if there are more
+      ...(cursor && {
+        cursor: { id: cursor },
+        skip: 1, // Skip the cursor itself
+      }),
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    const hasMore = prompts.length > limit;
+    const data = hasMore ? prompts.slice(0, limit) : prompts;
+    const nextCursor = hasMore ? data[data.length - 1].id : null;
+
+    return {
+      data,
+      nextCursor,
+      hasMore,
+    };
   }
 
   async findOne(id: string, userId: string): Promise<Prompt> {
@@ -163,6 +191,31 @@ export class PromptsService {
     });
   }
 
+  async deleteBulk(ids: string[], userId: string): Promise<{ deleted: number }> {
+    // Verify all prompts belong to the user
+    const prompts = await this.prisma.prompt.findMany({
+      where: {
+        id: { in: ids },
+        userId,
+      },
+      select: { id: true },
+    });
+
+    const foundIds = prompts.map((p) => p.id);
+    if (foundIds.length !== ids.length) {
+      throw new ForbiddenException('Some prompts do not belong to you or do not exist');
+    }
+
+    const result = await this.prisma.prompt.deleteMany({
+      where: {
+        id: { in: foundIds },
+        userId,
+      },
+    });
+
+    return { deleted: result.count };
+  }
+
   private extractPromptData(rawData: Record<string, unknown>): Record<string, unknown> {
     return rawData.prompt !== null &&
       rawData.prompt !== undefined &&
@@ -227,5 +280,20 @@ export class PromptsService {
     markdown += `**Favorite**: ${prompt.isFavorite ? '⭐' : '❌'}\n`;
 
     return markdown;
+  }
+
+  async findByShareToken(shareToken: string): Promise<Prompt> {
+    const prompt = await this.prisma.prompt.findFirst({
+      where: {
+        shareToken,
+        isPublic: true,
+      },
+    });
+
+    if (!prompt) {
+      throw new NotFoundException('Prompt not found or not public');
+    }
+
+    return prompt;
   }
 }

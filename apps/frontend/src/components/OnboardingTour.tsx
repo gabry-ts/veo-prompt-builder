@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Step, CallBackProps } from 'react-joyride';
 import Joyride, { STATUS } from 'react-joyride';
+import { Clapperboard } from 'lucide-react';
 
 interface OnboardingTourProps {
   run?: boolean;
@@ -12,7 +13,9 @@ const tourSteps: Step[] = [
     target: 'body',
     content: (
       <div className="space-y-3">
-        <h2 className="text-xl font-bold text-gray-900">Welcome to Veo Prompt Builder! 🎬</h2>
+        <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+          Welcome to Veo Prompt Builder! <Clapperboard className="w-6 h-6" />
+        </h2>
         <p className="text-gray-700">
           Let's take a quick tour to help you create amazing video prompts for Google Veo 3.
         </p>

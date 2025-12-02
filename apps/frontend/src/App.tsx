@@ -6,6 +6,8 @@ import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
 import PromptEditorPage from './pages/PromptEditorPage';
 import AdminPage from './pages/AdminPage';
+import SharedPromptPage from './pages/SharedPromptPage';
+import { ActivityPage } from './pages/ActivityPage';
 import { useAuthStore } from './store/authStore';
 
 function PrivateRoute({ children }: { children: React.ReactNode }): JSX.Element {
@@ -37,16 +39,18 @@ function App(): JSX.Element {
   return (
     <BrowserRouter>
       <Toaster
-        position="top-right"
+        position="bottom-right"
         toastOptions={{
-          duration: 4000,
+          duration: 3000,
           style: {
-            background: 'rgba(255, 255, 255, 0.9)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-            borderRadius: '12px',
-            padding: '16px',
+            background: 'white',
+            color: '#1f2937',
+            border: '1px solid #e5e7eb',
+            borderRadius: '8px',
+            padding: '12px 16px',
+            fontSize: '14px',
+            fontWeight: '500',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
           },
           success: {
             iconTheme: {
@@ -54,8 +58,9 @@ function App(): JSX.Element {
               secondary: '#fff',
             },
             style: {
-              background: 'rgba(236, 253, 245, 0.95)',
-              border: '1px solid #6ee7b7',
+              background: '#f0fdf4',
+              border: '1px solid #86efac',
+              color: '#166534',
             },
           },
           error: {
@@ -64,14 +69,20 @@ function App(): JSX.Element {
               secondary: '#fff',
             },
             style: {
-              background: 'rgba(254, 242, 242, 0.95)',
+              background: '#fef2f2',
               border: '1px solid #fca5a5',
+              color: '#991b1b',
             },
           },
           loading: {
+            iconTheme: {
+              primary: '#3b82f6',
+              secondary: '#fff',
+            },
             style: {
-              background: 'rgba(239, 246, 255, 0.95)',
+              background: '#eff6ff',
               border: '1px solid #93c5fd',
+              color: '#1e40af',
             },
           },
         }}
@@ -85,6 +96,7 @@ function App(): JSX.Element {
             </PublicRoute>
           }
         />
+        <Route path="/shared/:token" element={<SharedPromptPage />} />
         <Route
           path="/"
           element={
@@ -98,6 +110,7 @@ function App(): JSX.Element {
           <Route path="prompts/new" element={<PromptEditorPage />} />
           <Route path="prompts/:id" element={<PromptEditorPage />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="activity" element={<ActivityPage />} />
           <Route
             path="admin"
             element={

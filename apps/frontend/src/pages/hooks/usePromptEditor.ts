@@ -38,12 +38,13 @@ interface UsePromptEditorReturn {
   setDescription: (description: string) => void;
   tags: string[];
   setTags: (tags: string[]) => void;
+  handleTagsChange: (tags: string[]) => void;
   isFavorite: boolean;
   setIsFavorite: (favorite: boolean) => void;
   rating: number | undefined;
   setRating: (rating: number | undefined) => void;
   isPublic: boolean;
-  setIsPublic: (isPublic: boolean) => void;
+  handlePublicChange: (isPublic: boolean) => void;
   editorMode: EditorMode;
   setEditorMode: (mode: EditorMode) => void;
   showTemplateSelector: boolean;
@@ -56,6 +57,7 @@ interface UsePromptEditorReturn {
   handleTemplateSelect: (template: TemplateDomain) => void;
   handleImportJson: () => void;
   handleSave: () => void;
+  handleSilentSave: () => void;
   handleExport: () => void;
   isSaving: boolean;
   shareToken: string | null | undefined;
@@ -69,6 +71,10 @@ interface UsePromptEditorReturn {
   handleMarkdownPreview: () => void;
   handleMarkdownDownload: () => void;
   handleCloseMarkdownModal: () => void;
+  jsonPreview: string | null;
+  showJsonModal: boolean;
+  handleJsonDownload: () => void;
+  handleCloseJsonModal: () => void;
 }
 
 const getJsonFromEditor = (
@@ -76,16 +82,6 @@ const getJsonFromEditor = (
   data: VeoPromptStructure,
   json: string,
 ): VeoPromptStructure => (mode === 'visual' ? data : (JSON.parse(json) as VeoPromptStructure));
-
-const downloadJsonFile = (data: VeoPromptStructure, name: string): void => {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${name || 'prompt'}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-};
 
 const importJsonFile = (setPromptData: (data: VeoPromptStructure) => void): void => {
   const input = document.createElement('input');
@@ -136,9 +132,9 @@ const useCreatePromptMutation = (
 ): UseMutationResult<Prompt, unknown, PromptMutationData, unknown> => {
   return useMutation({
     mutationFn: (data: PromptMutationData) => promptService.create(data),
-    onSuccess: () => {
+    onSuccess: (newPrompt) => {
       void queryClient.invalidateQueries({ queryKey: ['prompts'] });
-      onNavigate('/dashboard');
+      onNavigate(`/prompts/${newPrompt.id}`);
     },
   });
 };
@@ -146,14 +142,26 @@ const useCreatePromptMutation = (
 const useUpdatePromptMutation = (
   id: string,
   queryClient: ReturnType<typeof useQueryClient>,
-  onNavigate: (path: string) => void,
 ): UseMutationResult<Prompt, unknown, PromptMutationData, unknown> => {
   return useMutation({
     mutationFn: (data: PromptMutationData) => promptService.update(id, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['prompts'] });
       void queryClient.invalidateQueries({ queryKey: ['prompt', id] });
-      onNavigate('/dashboard');
+    },
+  });
+};
+
+const useSilentUpdatePromptMutation = (
+  id: string,
+  queryClient: ReturnType<typeof useQueryClient>,
+): UseMutationResult<Prompt, unknown, PromptMutationData, unknown> => {
+  return useMutation({
+    mutationFn: (data: PromptMutationData) => promptService.update(id, data),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['prompts'] });
+      await queryClient.invalidateQueries({ queryKey: ['prompt', id] });
+      await queryClient.refetchQueries({ queryKey: ['prompt', id] });
     },
   });
 };
@@ -245,6 +253,8 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [markdownPreview, setMarkdownPreview] = useState<string | null>(null);
   const [showMarkdownModal, setShowMarkdownModal] = useState(false);
+  const [jsonPreview, setJsonPreview] = useState<string | null>(null);
+  const [showJsonModal, setShowJsonModal] = useState(false);
 
   const { data: prompt } = useQuery({
     queryKey: ['prompt', id],
@@ -276,7 +286,8 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
   }, [promptData, editorMode]);
 
   const createMutation = useCreatePromptMutation(queryClient, onNavigate);
-  const updateMutation = useUpdatePromptMutation(id!, queryClient, onNavigate);
+  const updateMutation = useUpdatePromptMutation(id!, queryClient);
+  const silentUpdateMutation = useSilentUpdatePromptMutation(id!, queryClient);
   const restoreMutation = useRestoreVersionMutation(id!, queryClient, setPromptData, setJsonData);
 
   useAutosave({
@@ -317,12 +328,51 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
     }
   };
 
+  const handleSilentSave = (): void => {
+    if (!isEditMode) return;
+    try {
+      silentUpdateMutation.mutate(
+        createSaveData(
+          name,
+          description,
+          tags,
+          isFavorite,
+          rating,
+          isPublic,
+          editorMode,
+          promptData,
+          jsonData,
+        ),
+      );
+    } catch {
+      // Silent fail
+    }
+  };
+
   const handleExport = (): void => {
     try {
-      downloadJsonFile(getJsonFromEditor(editorMode, promptData, jsonData), name);
+      const json = getJsonFromEditor(editorMode, promptData, jsonData);
+      setJsonPreview(JSON.stringify(json, null, 2));
+      setShowJsonModal(true);
     } catch {
       alert('Invalid JSON format');
     }
+  };
+
+  const handleJsonDownload = (): void => {
+    if (!jsonPreview) return;
+    const blob = new Blob([jsonPreview], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${name || 'prompt'}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleCloseJsonModal = (): void => {
+    setShowJsonModal(false);
+    setJsonPreview(null);
   };
 
   const handleMarkdownPreview = (): void => {
@@ -352,6 +402,54 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
     setMarkdownPreview(null);
   };
 
+  const handleTagsChange = (newTags: string[]): void => {
+    setTags(newTags);
+    if (isEditMode) {
+      // Silent save to backend with new tags
+      try {
+        silentUpdateMutation.mutate(
+          createSaveData(
+            name,
+            description,
+            newTags,
+            isFavorite,
+            rating,
+            isPublic,
+            editorMode,
+            promptData,
+            jsonData,
+          ),
+        );
+      } catch (error) {
+        console.error('Failed to auto-save tags:', error);
+      }
+    }
+  };
+
+  const handlePublicChange = (newIsPublic: boolean): void => {
+    setIsPublic(newIsPublic);
+    if (isEditMode) {
+      // Silent save to backend with new public state
+      try {
+        silentUpdateMutation.mutate(
+          createSaveData(
+            name,
+            description,
+            tags,
+            isFavorite,
+            rating,
+            newIsPublic, // Use the new value directly
+            editorMode,
+            promptData,
+            jsonData,
+          ),
+        );
+      } catch {
+        // Silent fail
+      }
+    }
+  };
+
   const validationResult = useMemo(() => {
     try {
       const json = getJsonFromEditor(editorMode, promptData, jsonData);
@@ -375,12 +473,13 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
     setDescription,
     tags,
     setTags,
+    handleTagsChange,
     isFavorite,
     setIsFavorite,
     rating,
     setRating,
     isPublic,
-    setIsPublic,
+    handlePublicChange,
     editorMode,
     setEditorMode,
     showTemplateSelector,
@@ -396,6 +495,7 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
     },
     handleImportJson: () => importJsonFile(setPromptData),
     handleSave,
+    handleSilentSave,
     handleExport,
     isSaving: createMutation.isPending || updateMutation.isPending,
     shareToken: prompt?.shareToken,
@@ -409,5 +509,9 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
     handleMarkdownPreview,
     handleMarkdownDownload,
     handleCloseMarkdownModal,
+    jsonPreview,
+    showJsonModal,
+    handleJsonDownload,
+    handleCloseJsonModal,
   };
 }
