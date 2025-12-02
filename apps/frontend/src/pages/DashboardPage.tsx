@@ -1,7 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Heart, Edit, FileText, Copy, Trash2, Check, Link as LinkIcon } from 'lucide-react';
+import {
+  Search,
+  Heart,
+  Edit,
+  FileText,
+  Copy,
+  Trash2,
+  Check,
+  Link as LinkIcon,
+  Film,
+  Star,
+  CheckCircle,
+} from 'lucide-react';
 import MarkdownPreview from '../components/MarkdownPreview';
 import StarRating from '../components/StarRating';
 import ValidationPanel from '../components/ValidationPanel';
@@ -232,6 +244,7 @@ function PromptCard({
   );
 }
 
+/* eslint-disable max-lines-per-function */
 function DashboardPage(): JSX.Element {
   const queryClient = useQueryClient();
 
@@ -302,16 +315,99 @@ function DashboardPage(): JSX.Element {
     updateMutation.mutate({ id, data: { rating } });
   };
 
+  const stats = useMemo(() => {
+    if (!prompts) return null;
+    const totalPrompts = prompts.length;
+    const favoriteCount = prompts.filter((p) => p.isFavorite).length;
+    const validCount = prompts.filter((p) => {
+      const validation = validateVeoPrompt(p.jsonData as unknown as VeoPromptStructure);
+      return !validation.warnings.some((w) => w.severity === 'error');
+    }).length;
+    const avgRating = prompts.reduce((sum, p) => sum + (p.rating || 0), 0) / (totalPrompts || 1);
+
+    return { totalPrompts, favoriteCount, validCount, avgRating };
+  }, [prompts]);
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">My Prompts</h1>
-        <Link
-          to="/prompts/new"
-          className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-        >
-          + Create New Prompt
-        </Link>
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+              <Film className="w-10 h-10 text-primary-600" />
+              My Prompts
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">
+              Manage your Veo 3.1 video prompts
+            </p>
+          </div>
+          <Link
+            to="/prompts/new"
+            className="px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 transition-all shadow-lg hover:shadow-xl font-semibold"
+          >
+            + Create New Prompt
+          </Link>
+        </div>
+
+        {/* Stats Cards */}
+        {stats && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl p-6 border-2 border-blue-200 dark:border-blue-700">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                    Total Prompts
+                  </p>
+                  <p className="text-3xl font-bold text-blue-900 dark:text-blue-100 mt-1">
+                    {stats.totalPrompts}
+                  </p>
+                </div>
+                <Film className="w-12 h-12 text-blue-500 opacity-50" />
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 rounded-xl p-6 border-2 border-red-200 dark:border-red-700">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-red-600 dark:text-red-400">Favorites</p>
+                  <p className="text-3xl font-bold text-red-900 dark:text-red-100 mt-1">
+                    {stats.favoriteCount}
+                  </p>
+                </div>
+                <Heart className="w-12 h-12 text-red-500 opacity-50 fill-current" />
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl p-6 border-2 border-green-200 dark:border-green-700">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-green-600 dark:text-green-400">
+                    Valid Prompts
+                  </p>
+                  <p className="text-3xl font-bold text-green-900 dark:text-green-100 mt-1">
+                    {stats.validCount}
+                  </p>
+                </div>
+                <CheckCircle className="w-12 h-12 text-green-500 opacity-50" />
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 rounded-xl p-6 border-2 border-yellow-200 dark:border-yellow-700">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                    Avg Rating
+                  </p>
+                  <p className="text-3xl font-bold text-yellow-900 dark:text-yellow-100 mt-1">
+                    {stats.avgRating.toFixed(1)}
+                  </p>
+                </div>
+                <Star className="w-12 h-12 text-yellow-500 opacity-50 fill-current" />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {prompts && prompts.length > 0 && (
