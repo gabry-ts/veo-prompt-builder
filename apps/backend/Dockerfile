@@ -26,6 +26,10 @@ COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_module
 COPY apps/backend ./apps/backend
 COPY packages/shared ./packages/shared
 
+# Build shared package first
+WORKDIR /app/packages/shared
+RUN yarn build
+
 # Generate Prisma Client
 WORKDIR /app/apps/backend
 RUN npx prisma generate
