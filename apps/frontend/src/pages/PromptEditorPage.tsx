@@ -24,6 +24,7 @@ function PromptEditorPage(): JSX.Element {
     setDescription,
     tags,
     setTags,
+    handleTagsChange,
     isFavorite,
     setIsFavorite,
     rating,
@@ -109,6 +110,8 @@ function PromptEditorPage(): JSX.Element {
         versions={versions}
         isLoadingVersions={isLoadingVersions}
         onRestoreVersion={handleRestoreVersion}
+        tags={tags}
+        onTagsChange={handleTagsChange}
       />
       {showMarkdownModal && markdownPreview !== null && (
         <MarkdownPreviewModal

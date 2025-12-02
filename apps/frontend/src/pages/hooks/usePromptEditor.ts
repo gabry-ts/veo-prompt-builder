@@ -38,6 +38,7 @@ interface UsePromptEditorReturn {
   setDescription: (description: string) => void;
   tags: string[];
   setTags: (tags: string[]) => void;
+  handleTagsChange: (tags: string[]) => void;
   isFavorite: boolean;
   setIsFavorite: (favorite: boolean) => void;
   rating: number | undefined;
@@ -403,6 +404,30 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
     setMarkdownPreview(null);
   };
 
+  const handleTagsChange = (newTags: string[]): void => {
+    setTags(newTags);
+    if (isEditMode) {
+      // Silent save to backend with new tags
+      try {
+        silentUpdateMutation.mutate(
+          createSaveData(
+            name,
+            description,
+            newTags,
+            isFavorite,
+            rating,
+            isPublic,
+            editorMode,
+            promptData,
+            jsonData,
+          ),
+        );
+      } catch (error) {
+        console.error('Failed to auto-save tags:', error);
+      }
+    }
+  };
+
   const handlePublicChange = (newIsPublic: boolean): void => {
     setIsPublic(newIsPublic);
     if (isEditMode) {
@@ -450,6 +475,7 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
     setDescription,
     tags,
     setTags,
+    handleTagsChange,
     isFavorite,
     setIsFavorite,
     rating,

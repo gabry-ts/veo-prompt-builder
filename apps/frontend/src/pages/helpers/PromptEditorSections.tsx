@@ -14,6 +14,7 @@ import {
   X,
   Heart,
 } from 'lucide-react';
+import TagMultiselect from '../../components/TagMultiselect';
 import VisualFormBuilderV2 from '../../components/PromptBuilder/VisualFormBuilderV2';
 import ValidationPanel from '../../components/ValidationPanel';
 import type { VeoPromptStructure, TemplateDomain } from '../../data/veoTemplates';
@@ -141,6 +142,8 @@ interface MainContentGridProps {
   versions: PromptVersion[];
   isLoadingVersions: boolean;
   onRestoreVersion: (versionId: string) => void;
+  tags: string[];
+  onTagsChange: (tags: string[]) => void;
 }
 
 /* eslint-disable max-lines-per-function */
@@ -168,6 +171,8 @@ export function MainContentGrid({
   versions,
   isLoadingVersions,
   onRestoreVersion,
+  tags,
+  onTagsChange,
 }: MainContentGridProps): JSX.Element {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showVersionsModal, setShowVersionsModal] = useState(false);
@@ -227,6 +232,9 @@ export function MainContentGrid({
             >
               <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
             </button>
+
+            {/* Tags Multiselect */}
+            <TagMultiselect tags={tags} onTagsChange={onTagsChange} />
 
             {editorMode === 'visual' && (
               <button
