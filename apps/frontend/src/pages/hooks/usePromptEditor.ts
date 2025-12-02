@@ -132,9 +132,9 @@ const useCreatePromptMutation = (
 ): UseMutationResult<Prompt, unknown, PromptMutationData, unknown> => {
   return useMutation({
     mutationFn: (data: PromptMutationData) => promptService.create(data),
-    onSuccess: () => {
+    onSuccess: (newPrompt) => {
       void queryClient.invalidateQueries({ queryKey: ['prompts'] });
-      onNavigate('/dashboard');
+      onNavigate(`/prompts/${newPrompt.id}`);
     },
   });
 };
@@ -142,14 +142,12 @@ const useCreatePromptMutation = (
 const useUpdatePromptMutation = (
   id: string,
   queryClient: ReturnType<typeof useQueryClient>,
-  onNavigate: (path: string) => void,
 ): UseMutationResult<Prompt, unknown, PromptMutationData, unknown> => {
   return useMutation({
     mutationFn: (data: PromptMutationData) => promptService.update(id, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['prompts'] });
       void queryClient.invalidateQueries({ queryKey: ['prompt', id] });
-      onNavigate('/dashboard');
     },
   });
 };
@@ -288,7 +286,7 @@ export function usePromptEditor({ id, onNavigate }: UsePromptEditorProps): UsePr
   }, [promptData, editorMode]);
 
   const createMutation = useCreatePromptMutation(queryClient, onNavigate);
-  const updateMutation = useUpdatePromptMutation(id!, queryClient, onNavigate);
+  const updateMutation = useUpdatePromptMutation(id!, queryClient);
   const silentUpdateMutation = useSilentUpdatePromptMutation(id!, queryClient);
   const restoreMutation = useRestoreVersionMutation(id!, queryClient, setPromptData, setJsonData);
 

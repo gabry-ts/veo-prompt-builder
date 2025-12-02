@@ -2,7 +2,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   PageHeader,
   BasicInfoForm,
-  MetadataForm,
   MarkdownPreviewModal,
   JsonPreviewModal,
 } from './helpers/PromptEditorHelpers';
@@ -23,7 +22,6 @@ function PromptEditorPage(): JSX.Element {
     description,
     setDescription,
     tags,
-    setTags,
     handleTagsChange,
     isFavorite,
     setIsFavorite,
@@ -70,7 +68,6 @@ function PromptEditorPage(): JSX.Element {
         onNameChange={setName}
         onDescriptionChange={setDescription}
       />
-      <MetadataForm tags={tags} onTagsChange={setTags} />
       <TemplatesSection
         isEditMode={isEditMode}
         name={name}

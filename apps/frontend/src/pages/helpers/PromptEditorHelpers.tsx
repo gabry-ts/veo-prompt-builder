@@ -19,7 +19,6 @@ import {
   Sparkles,
 } from 'lucide-react';
 import TemplateCarousel from '../../components/PromptBuilder/TemplateCarousel';
-import CollapsibleSection from '../../components/PromptBuilder/CollapsibleSection';
 import type { TemplateDomain } from '../../data/veoTemplates';
 import type { PromptVersion } from '../../types/prompt';
 import type { ValidationResult } from '../../utils/veoValidation';
@@ -186,88 +185,6 @@ export function EditorActions({
           </button>
         )}
       </div>
-    </div>
-  );
-}
-
-interface MetadataFormProps {
-  tags: string[];
-  onTagsChange: (tags: string[]) => void;
-}
-
-export function MetadataForm({ tags, onTagsChange }: MetadataFormProps): JSX.Element {
-  const [tagInput, setTagInput] = useState('');
-
-  const handleAddTag = (): void => {
-    const trimmed = tagInput.trim();
-    if (trimmed !== '' && !tags.includes(trimmed)) {
-      onTagsChange([...tags, trimmed]);
-      setTagInput('');
-    }
-  };
-
-  const handleRemoveTag = (tagToRemove: string): void => {
-    onTagsChange(tags.filter((tag) => tag !== tagToRemove));
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddTag();
-    }
-  };
-
-  const getCompletionStatus = (): 'empty' | 'partial' | 'complete' => {
-    if (tags.length === 0) return 'empty';
-    return 'complete';
-  };
-
-  return (
-    <div className="mb-6">
-      <CollapsibleSection
-        title="Metadata"
-        icon={<Package className="w-5 h-5" />}
-        defaultOpen={true}
-        completionStatus={getCompletionStatus()}
-      >
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Tags
-          </label>
-          <div className="flex gap-2 mb-2">
-            <input
-              type="text"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Add a tag..."
-              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
-            />
-            <button
-              onClick={handleAddTag}
-              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-semibold"
-            >
-              Add
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {tags.map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex items-center gap-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-3 py-1 rounded-full text-sm"
-              >
-                {tag}
-                <button
-                  onClick={() => handleRemoveTag(tag)}
-                  className="hover:text-emerald-900 dark:hover:text-emerald-200"
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-        </div>
-      </CollapsibleSection>
     </div>
   );
 }
