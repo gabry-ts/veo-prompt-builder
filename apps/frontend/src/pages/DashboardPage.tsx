@@ -35,6 +35,8 @@ interface PromptFiltersProps {
   showFavoritesOnly: boolean;
   onToggleFavorites: () => void;
   allTags: string[];
+  deleteMode: boolean;
+  onToggleDeleteMode: () => void;
 }
 
 function PromptFilters({
@@ -47,6 +49,8 @@ function PromptFilters({
   showFavoritesOnly,
   onToggleFavorites,
   allTags,
+  deleteMode,
+  onToggleDeleteMode,
 }: PromptFiltersProps): JSX.Element {
   return (
     <div className="mb-6 flex flex-col gap-4">
@@ -82,6 +86,16 @@ function PromptFilters({
             <option value="date">Sort by Date</option>
             <option value="name">Sort by Name</option>
           </select>
+          <button
+            onClick={onToggleDeleteMode}
+            className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
+              deleteMode
+                ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-500'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-400 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+            }`}
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -155,29 +169,25 @@ function PromptCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Selection Checkbox - Top Right on Hover or when selection mode active */}
-      <div
-        className={`absolute top-4 right-4 z-30 transition-all duration-300 ${
-          isHovered || isSelected || selectionModeActive
-            ? 'opacity-100 translate-y-0'
-            : 'opacity-0 -translate-y-2 pointer-events-none'
-        }`}
-      >
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleSelect(prompt.id);
-          }}
-          className={`w-10 h-10 rounded-full border-2 transition-all duration-200 flex items-center justify-center shadow-lg backdrop-blur-sm ${
-            isSelected
-              ? 'bg-primary-600 border-primary-600 scale-110'
-              : 'bg-white/90 dark:bg-gray-800/90 border-gray-300 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500 hover:scale-105'
-          }`}
-        >
-          {isSelected && <Check className="w-5 h-5 text-white" strokeWidth={3} />}
-        </button>
-      </div>
+      {/* Selection Checkbox - Only visible when delete mode is active */}
+      {selectionModeActive && (
+        <div className="absolute top-4 right-4 z-30 transition-all duration-300">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleSelect(prompt.id);
+            }}
+            className={`w-10 h-10 rounded-full border-2 transition-all duration-200 flex items-center justify-center shadow-lg backdrop-blur-sm ${
+              isSelected
+                ? 'bg-primary-600 border-primary-600 scale-110'
+                : 'bg-white/90 dark:bg-gray-800/90 border-gray-300 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500 hover:scale-105'
+            }`}
+          >
+            {isSelected && <Check className="w-5 h-5 text-white" strokeWidth={3} />}
+          </button>
+        </div>
+      )}
 
       {/* Glassmorphism Card */}
       <div
@@ -388,6 +398,7 @@ function DashboardPage(): JSX.Element {
   } = usePromptFilters(prompts);
 
   const [selectedPromptIds, setSelectedPromptIds] = useState<Set<string>>(new Set());
+  const [deleteMode, setDeleteMode] = useState(false);
 
   const bulkDeleteMutation = useMutation({
     mutationFn: (ids: string[]) => promptService.deleteBulk(ids),
@@ -464,6 +475,14 @@ function DashboardPage(): JSX.Element {
 
   const handleCancelSelection = (): void => {
     setSelectedPromptIds(new Set());
+    setDeleteMode(false);
+  };
+
+  const handleToggleDeleteMode = (): void => {
+    setDeleteMode(!deleteMode);
+    if (deleteMode) {
+      setSelectedPromptIds(new Set());
+    }
   };
 
   const stats = useMemo(() => {
@@ -572,6 +591,8 @@ function DashboardPage(): JSX.Element {
           showFavoritesOnly={showFavoritesOnly}
           onToggleFavorites={() => setShowFavoritesOnly(!showFavoritesOnly)}
           allTags={allTags}
+          deleteMode={deleteMode}
+          onToggleDeleteMode={handleToggleDeleteMode}
         />
       )}
 
@@ -612,7 +633,7 @@ function DashboardPage(): JSX.Element {
                 isDeleting={deleteMutation.isPending}
                 isSelected={selectedPromptIds.has(prompt.id)}
                 onToggleSelect={handleToggleSelect}
-                selectionModeActive={selectedPromptIds.size > 0}
+                selectionModeActive={deleteMode}
               />
             ))}
           </div>
