@@ -10,7 +10,6 @@ import {
   Clock,
   Check,
   Clipboard,
-  Star,
   Globe,
   Link,
   Scroll,
@@ -20,7 +19,6 @@ import {
   Sparkles,
 } from 'lucide-react';
 import TemplateCarousel from '../../components/PromptBuilder/TemplateCarousel';
-import StarRating from '../../components/StarRating';
 import type { TemplateDomain } from '../../data/veoTemplates';
 import type { PromptVersion } from '../../types/prompt';
 import type { ValidationResult } from '../../utils/veoValidation';
@@ -194,24 +192,9 @@ export function EditorActions({
 interface MetadataFormProps {
   tags: string[];
   onTagsChange: (tags: string[]) => void;
-  rating: number | undefined;
-  onRatingChange: (rating: number | undefined) => void;
-  isFavorite: boolean;
-  onFavoriteChange: (favorite: boolean) => void;
-  isPublic: boolean;
-  onPublicChange: (isPublic: boolean) => void;
 }
 
-export function MetadataForm({
-  tags,
-  onTagsChange,
-  rating,
-  onRatingChange,
-  isFavorite,
-  onFavoriteChange,
-  isPublic,
-  onPublicChange,
-}: MetadataFormProps): JSX.Element {
+export function MetadataForm({ tags, onTagsChange }: MetadataFormProps): JSX.Element {
   const [tagInput, setTagInput] = useState('');
 
   const handleAddTag = (): void => {
@@ -273,43 +256,6 @@ export function MetadataForm({
               </span>
             ))}
           </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Rating
-          </label>
-          <StarRating rating={rating} onRate={onRatingChange} />
-        </div>
-
-        <div className="flex items-end">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={isFavorite}
-              onChange={(e) => onFavoriteChange(e.target.checked)}
-              className="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-            />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1">
-              <Star className="w-4 h-4" /> Favorite
-            </span>
-          </label>
-        </div>
-
-        <div className="flex items-end">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={isPublic}
-              onChange={(e) => onPublicChange(e.target.checked)}
-              className="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-            />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1">
-              <Globe className="w-4 h-4" /> Public
-            </span>
-          </label>
         </div>
       </div>
     </div>
@@ -473,10 +419,16 @@ export function ValidationCard({
 interface ShareSectionProps {
   shareUrl: string | undefined;
   isPublic: boolean;
+  onPublicChange: (isPublic: boolean) => void;
   lastSaved: Date | null;
 }
 
-export function ShareSection({ shareUrl, isPublic, lastSaved }: ShareSectionProps): JSX.Element {
+export function ShareSection({
+  shareUrl,
+  isPublic,
+  onPublicChange,
+  lastSaved,
+}: ShareSectionProps): JSX.Element {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = (): void => {
@@ -492,6 +444,19 @@ export function ShareSection({ shareUrl, isPublic, lastSaved }: ShareSectionProp
       <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
         <Link className="w-5 h-5" /> Share
       </h2>
+      <div className="mb-4">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={isPublic}
+            onChange={(e) => onPublicChange(e.target.checked)}
+            className="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+          />
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1">
+            <Globe className="w-4 h-4" /> Public
+          </span>
+        </label>
+      </div>
       {isPublic && shareUrl !== undefined ? (
         <div>
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Public share link:</p>
@@ -518,11 +483,11 @@ export function ShareSection({ shareUrl, isPublic, lastSaved }: ShareSectionProp
             </button>
           </div>
         </div>
-      ) : (
+      ) : isPublic ? (
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Enable &quot;Public&quot; in metadata to generate a share link
+          Save the prompt to generate a share link
         </p>
-      )}
+      ) : null}
       {lastSaved !== null && (
         <p className="text-xs text-gray-500 dark:text-gray-500 mt-3">
           Last autosaved: {lastSaved.toLocaleTimeString()}

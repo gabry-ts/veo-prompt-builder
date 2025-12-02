@@ -12,6 +12,7 @@ import {
   Link,
   Scroll,
   X,
+  Star,
 } from 'lucide-react';
 import VisualFormBuilderV2 from '../../components/PromptBuilder/VisualFormBuilderV2';
 import ValidationPanel from '../../components/ValidationPanel';
@@ -25,6 +26,7 @@ import {
   ShareSection,
   VersionHistory,
 } from './PromptEditorHelpers';
+import StarRating from '../../components/StarRating';
 
 interface TemplatesSectionProps {
   isEditMode: boolean;
@@ -130,6 +132,11 @@ interface MainContentGridProps {
   isEditMode: boolean;
   shareUrl: string | undefined;
   isPublic: boolean;
+  onPublicChange: (isPublic: boolean) => void;
+  rating: number | undefined;
+  onRatingChange: (rating: number | undefined) => void;
+  isFavorite: boolean;
+  onFavoriteChange: (favorite: boolean) => void;
   lastSaved: Date | null;
   versions: PromptVersion[];
   isLoadingVersions: boolean;
@@ -152,6 +159,11 @@ export function MainContentGrid({
   isEditMode,
   shareUrl,
   isPublic,
+  onPublicChange,
+  rating,
+  onRatingChange,
+  isFavorite,
+  onFavoriteChange,
   lastSaved,
   versions,
   isLoadingVersions,
@@ -198,7 +210,24 @@ export function MainContentGrid({
             )}
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 items-center">
+            {/* Rating */}
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700">
+              <StarRating rating={rating} onRate={onRatingChange} />
+            </div>
+
+            {/* Favorite */}
+            <button
+              onClick={() => onFavoriteChange(!isFavorite)}
+              className={`px-4 py-2.5 rounded-lg transition-all font-semibold shadow-md flex items-center gap-2 ${
+                isFavorite
+                  ? 'bg-yellow-500 text-white hover:bg-yellow-600'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
+            >
+              <Star className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+            </button>
+
             {editorMode === 'visual' && (
               <button
                 onClick={() => setShowJsonPreview(!showJsonPreview)}
@@ -284,7 +313,12 @@ export function MainContentGrid({
                 <X className="w-6 h-6" />
               </button>
             </div>
-            <ShareSection shareUrl={shareUrl} isPublic={isPublic} lastSaved={lastSaved} />
+            <ShareSection
+              shareUrl={shareUrl}
+              isPublic={isPublic}
+              onPublicChange={onPublicChange}
+              lastSaved={lastSaved}
+            />
           </div>
         </div>
       )}
