@@ -7,9 +7,6 @@ import {
   Save,
   Clock,
   Package,
-  Heart,
-  Globe,
-  Lock,
   Eye,
   EyeOff,
   Link,
@@ -133,9 +130,6 @@ interface MainContentGridProps {
   isEditMode: boolean;
   shareUrl: string | undefined;
   isPublic: boolean;
-  isFavorite: boolean;
-  onPublicChange: (isPublic: boolean) => void;
-  onFavoriteChange: (isFavorite: boolean) => void;
   lastSaved: Date | null;
   versions: PromptVersion[];
   isLoadingVersions: boolean;
@@ -158,9 +152,6 @@ export function MainContentGrid({
   isEditMode,
   shareUrl,
   isPublic,
-  isFavorite,
-  onPublicChange,
-  onFavoriteChange,
   lastSaved,
   versions,
   isLoadingVersions,
@@ -208,28 +199,6 @@ export function MainContentGrid({
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => onFavoriteChange(!isFavorite)}
-              className={`px-4 py-2.5 rounded-lg font-semibold transition-all shadow-md flex items-center gap-1 ${
-                isFavorite
-                  ? 'bg-red-500 text-white hover:bg-red-600'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-red-100 dark:hover:bg-red-900/30'
-              }`}
-            >
-              <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
-            </button>
-
-            <button
-              onClick={() => onPublicChange(!isPublic)}
-              className={`px-4 py-2.5 rounded-lg font-semibold transition-all shadow-md flex items-center gap-1 ${
-                isPublic
-                  ? 'bg-green-500 text-white hover:bg-green-600'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-green-100 dark:hover:bg-green-900/30'
-              }`}
-            >
-              {isPublic ? <Globe className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-            </button>
-
             {editorMode === 'visual' && (
               <button
                 onClick={() => setShowJsonPreview(!showJsonPreview)}

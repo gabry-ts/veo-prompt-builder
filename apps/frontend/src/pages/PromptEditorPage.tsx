@@ -109,9 +109,6 @@ function PromptEditorPage(): JSX.Element {
         isEditMode={isEditMode}
         shareUrl={shareUrl}
         isPublic={isPublic}
-        isFavorite={isFavorite}
-        onPublicChange={setIsPublic}
-        onFavoriteChange={setIsFavorite}
         lastSaved={lastSaved}
         versions={versions}
         isLoadingVersions={isLoadingVersions}
