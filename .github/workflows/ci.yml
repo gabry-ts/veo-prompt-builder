@@ -27,6 +27,9 @@ jobs:
       - name: Generate Prisma Client
         run: yarn workspace @meo-veo/backend prisma:generate
 
+      - name: Build Shared Package
+        run: yarn workspace @meo-veo/shared build
+
       - name: Run Prettier
         run: yarn prettier --check "apps/**/*.{ts,tsx,js,jsx,json,css,md}"
 
