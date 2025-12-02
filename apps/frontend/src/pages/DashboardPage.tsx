@@ -1,6 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useInView } from 'react-intersection-observer';
 import {
   Search,
   Heart,
@@ -18,6 +19,7 @@ import MarkdownPreview from '../components/MarkdownPreview';
 import StarRating from '../components/StarRating';
 import type { VeoPromptStructure } from '../data/veoTemplates';
 import { usePromptFilters } from '../hooks/usePromptFilters';
+import { useInfinitePrompts } from '../hooks/useInfinitePrompts';
 import { promptService } from '../services/promptService';
 import type { Prompt } from '../types/prompt';
 import { validateVeoPrompt } from '../utils/veoValidation';
@@ -325,10 +327,19 @@ function PromptCard({
 function DashboardPage(): JSX.Element {
   const queryClient = useQueryClient();
 
-  const { data: prompts, isLoading } = useQuery({
-    queryKey: ['prompts'],
-    queryFn: () => promptService.getAll(),
+  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } = useInfinitePrompts();
+
+  const prompts = data?.allPrompts;
+
+  // Infinite scroll observer
+  const { ref: loadMoreRef, inView } = useInView({
+    threshold: 0,
   });
+
+  // Trigger fetch when loadMoreRef is in view
+  if (inView && hasNextPage && !isFetchingNextPage) {
+    void fetchNextPage();
+  }
 
   const {
     searchQuery,
@@ -524,20 +535,36 @@ function DashboardPage(): JSX.Element {
         )}
 
       {!isLoading && filteredAndSortedPrompts && filteredAndSortedPrompts.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredAndSortedPrompts.map((prompt) => (
-            <PromptCard
-              key={prompt.id}
-              prompt={prompt}
-              onDelete={handleDelete}
-              onDuplicate={handleDuplicate}
-              onToggleFavorite={handleToggleFavorite}
-              onRate={handleRate}
-              isDuplicating={duplicateMutation.isPending}
-              isDeleting={deleteMutation.isPending}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredAndSortedPrompts.map((prompt) => (
+              <PromptCard
+                key={prompt.id}
+                prompt={prompt}
+                onDelete={handleDelete}
+                onDuplicate={handleDuplicate}
+                onToggleFavorite={handleToggleFavorite}
+                onRate={handleRate}
+                isDuplicating={duplicateMutation.isPending}
+                isDeleting={deleteMutation.isPending}
+              />
+            ))}
+          </div>
+
+          {/* Infinite Scroll Trigger */}
+          {hasNextPage && (
+            <div ref={loadMoreRef} className="py-8 flex justify-center">
+              {isFetchingNextPage ? (
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                  <div className="w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
+                  <span>Loading more prompts...</span>
+                </div>
+              ) : (
+                <div className="text-sm text-gray-500 dark:text-gray-400">Scroll to load more</div>
+              )}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

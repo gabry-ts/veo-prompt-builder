@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../common/prisma/prisma.service';
 import type { CreatePromptDto } from './dto/create-prompt.dto';
 import type { UpdatePromptDto } from './dto/update-prompt.dto';
+import type { QueryPromptsDto } from './dto/query-prompts.dto';
 
 @Injectable()
 export class PromptsService {
@@ -38,6 +39,33 @@ export class PromptsService {
       where: { userId },
       orderBy: { updatedAt: 'desc' },
     });
+  }
+
+  async findAllPaginated(
+    userId: string,
+    query: QueryPromptsDto,
+  ): Promise<{ data: Prompt[]; nextCursor: string | null; hasMore: boolean }> {
+    const { limit = 20, cursor } = query;
+
+    const prompts = await this.prisma.prompt.findMany({
+      where: { userId },
+      take: limit + 1, // Take one extra to check if there are more
+      ...(cursor && {
+        cursor: { id: cursor },
+        skip: 1, // Skip the cursor itself
+      }),
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    const hasMore = prompts.length > limit;
+    const data = hasMore ? prompts.slice(0, limit) : prompts;
+    const nextCursor = hasMore ? data[data.length - 1].id : null;
+
+    return {
+      data,
+      nextCursor,
+      hasMore,
+    };
   }
 
   async findOne(id: string, userId: string): Promise<Prompt> {

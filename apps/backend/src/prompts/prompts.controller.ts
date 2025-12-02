@@ -8,12 +8,14 @@ import {
   Delete,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import type { User } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreatePromptDto } from './dto/create-prompt.dto';
 import { UpdatePromptDto } from './dto/update-prompt.dto';
+import { QueryPromptsDto } from './dto/query-prompts.dto';
 import { PromptsService } from './prompts.service';
 import { PromptResponseDto } from '../common/dto/prompt-response.dto';
 
@@ -50,11 +52,22 @@ export class PromptsController {
   @Get()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get all prompts for current user' })
+  @ApiOperation({ summary: 'Get all prompts for current user with pagination' })
   @ApiResponse({ status: 200, type: [PromptResponseDto] })
-  async findAll(@Request() req: RequestWithUser): Promise<PromptResponseDto[]> {
-    const prompts = await this.promptsService.findAll(req.user.id);
-    return prompts.map(PromptResponseDto.fromPrisma);
+  async findAll(
+    @Request() req: RequestWithUser,
+    @Query() query: QueryPromptsDto,
+  ): Promise<{
+    data: PromptResponseDto[];
+    nextCursor: string | null;
+    hasMore: boolean;
+  }> {
+    const result = await this.promptsService.findAllPaginated(req.user.id, query);
+    return {
+      data: result.data.map(PromptResponseDto.fromPrisma),
+      nextCursor: result.nextCursor,
+      hasMore: result.hasMore,
+    };
   }
 
   @Get(':id')

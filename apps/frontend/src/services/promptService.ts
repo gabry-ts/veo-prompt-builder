@@ -6,9 +6,25 @@ import type {
 } from '../types/prompt';
 import api from './api';
 
+export interface PaginatedPromptsResponse {
+  data: Prompt[];
+  nextCursor: string | null;
+  hasMore: boolean;
+}
+
 export const promptService = {
   getAll: async (): Promise<Prompt[]> => {
     const response = await api.get<Prompt[]>('/prompts');
+    return response.data;
+  },
+
+  getPaginated: async (cursor?: string, limit = 20): Promise<PaginatedPromptsResponse> => {
+    const params = new URLSearchParams();
+    params.append('limit', limit.toString());
+    if (cursor) {
+      params.append('cursor', cursor);
+    }
+    const response = await api.get<PaginatedPromptsResponse>(`/prompts?${params.toString()}`);
     return response.data;
   },
 
